@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { calculationInputSchema, type CalculationInput } from "@foc/shared";
 import {
+  forwardRef,
   useMemo,
   useState,
   type InputHTMLAttributes,
@@ -15,20 +16,19 @@ import { useNavigate } from "react-router-dom";
 import { CalcIconCircle, InfoTip, PageFrame } from "@/components/layout/PageFrame";
 import { createCalculation } from "@/lib/api";
 
-function FloatingInput({
-  label,
-  type = "text",
-  suffix,
-  prefix,
-  className = "",
-  mutedBg,
-  ...rest
-}: Omit<InputHTMLAttributes<HTMLInputElement>, "prefix"> & {
-  label: string;
-  suffix?: ReactNode;
-  prefix?: ReactNode;
-  mutedBg?: boolean;
-}) {
+/** Must use forwardRef so `react-hook-form`'s `register()` ref reaches the real &lt;input&gt; (refs are dropped on plain function components). */
+const FloatingInput = forwardRef<
+  HTMLInputElement,
+  Omit<InputHTMLAttributes<HTMLInputElement>, "prefix"> & {
+    label: string;
+    suffix?: ReactNode;
+    prefix?: ReactNode;
+    mutedBg?: boolean;
+  }
+>(function FloatingInput(
+  { label, type = "text", suffix, prefix, className = "", mutedBg, ...rest },
+  ref,
+) {
   return (
     <div className={`relative ${className}`}>
       <label className="absolute left-3 top-0 z-10 -translate-y-1/2 bg-white px-1 text-[11px] text-accent-muted">
@@ -39,6 +39,7 @@ function FloatingInput({
       >
         {prefix && <span className="pl-3 text-sm text-neutral-600">{prefix}</span>}
         <input
+          ref={ref}
           type={type}
           className={`min-h-[48px] w-full rounded bg-transparent px-3 py-2 text-sm outline-none placeholder:text-neutral-400 ${prefix ? "pl-1" : ""}`}
           {...rest}
@@ -47,31 +48,32 @@ function FloatingInput({
       </div>
     </div>
   );
-}
+});
 
-function FloatingTextarea({
-  label,
-  className = "",
-  rows = 3,
-  mutedBg = true,
-  ...rest
-}: TextareaHTMLAttributes<HTMLTextAreaElement> & {
-  label: string;
-  mutedBg?: boolean;
-}) {
+const FloatingTextarea = forwardRef<
+  HTMLTextAreaElement,
+  TextareaHTMLAttributes<HTMLTextAreaElement> & {
+    label: string;
+    mutedBg?: boolean;
+  }
+>(function FloatingTextarea(
+  { label, className = "", rows = 3, mutedBg = true, ...rest },
+  ref,
+) {
   return (
     <div className={`relative ${className}`}>
       <label className="absolute left-3 top-0 z-10 -translate-y-1/2 bg-white px-1 text-[11px] text-accent-muted">
         {label}
       </label>
       <textarea
+        ref={ref}
         rows={rows}
         className={`min-h-[52px] w-full resize-y rounded border border-neutral-300 px-3 pb-3 pt-4 text-sm font-medium outline-none placeholder:text-neutral-400 ${mutedBg ? "bg-accent-inputbg" : "bg-white"}`}
         {...rest}
       />
     </div>
   );
-}
+});
 
 function summarizeValidationErrors(errors: FieldErrors<CalculationInput>): string {
   const parts: string[] = [];
