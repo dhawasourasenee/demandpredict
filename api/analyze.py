@@ -5,7 +5,13 @@ Vercel serverless entry: URL /api/analyze → this function receives path / only
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path
+
+# Vercel may not put the repo root on sys.path; `from api.*` fails without this.
+_repo_root = Path(__file__).resolve().parent.parent
+if str(_repo_root) not in sys.path:
+    sys.path.insert(0, str(_repo_root))
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
@@ -14,9 +20,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from api.analysis import run_analysis
 from api.schemas import AnalyzeRequest, AnalyzeResponse
 
-_root = Path(__file__).resolve().parent.parent
-load_dotenv(_root / ".env")
-load_dotenv(_root / ".env.local")
+load_dotenv(_repo_root / ".env")
+load_dotenv(_repo_root / ".env.local")
 
 _default_origins = [
     "http://localhost:5173",

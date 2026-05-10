@@ -3,5 +3,11 @@
   "framework": "vite",
   "installCommand": "npm ci && (uv pip install --system -r requirements.txt || python3 -m pip install -r requirements.txt --break-system-packages)",
   "buildCommand": "npm run build",
-  "outputDirectory": "dist"
+  "outputDirectory": "dist",
+  "functions": {
+    "api/analyze.py": {
+      "maxDuration": 60,
+      "memory": 1024
+    }
+  }
 }
