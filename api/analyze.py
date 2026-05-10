@@ -1,5 +1,7 @@
 """
-Vercel serverless entry: URL /api/analyze → this function receives path / only.
+Vercel serverless entry for /api/analyze.
+
+Some runtimes forward path "/"; others forward "/api/analyze". Register both.
 """
 
 from __future__ import annotations
@@ -44,5 +46,6 @@ app.add_middleware(
 
 
 @app.post("/", response_model=AnalyzeResponse)
+@app.post("/api/analyze", response_model=AnalyzeResponse)
 async def analyze(req: AnalyzeRequest) -> AnalyzeResponse:
     return await run_analysis(req)

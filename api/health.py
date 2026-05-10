@@ -1,5 +1,5 @@
 """
-Vercel serverless entry: URL /api/health → this function receives path / only.
+Vercel serverless entry for /api/health. Register "/" and "/api/health" for path quirks.
 """
 
 from __future__ import annotations
@@ -41,5 +41,6 @@ app.add_middleware(
 
 
 @app.get("/")
+@app.get("/api/health")
 async def health() -> dict[str, str]:
     return {"status": "ok"}
