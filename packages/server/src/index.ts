@@ -23,3 +23,4 @@ export {
   attachReportToSpace,
 } from "./memoryStore.js";
 export { buildPdfPlaceholder } from "./pdf.js";
+export { focLog } from "./log.js";

@@ -3,6 +3,7 @@ import type { Message } from "@anthropic-ai/sdk/resources/messages/messages.js";
 import type { CalculationInput } from "@foc/shared";
 
 import { claudeTrendAnalysisSchema, type ClaudeTrendAnalysis } from "./claudeSchema.js";
+import { focLog } from "./log.js";
 import { SYSTEM_PROMPT, userContentForAgentFromCalculation } from "./prompts.js";
 import type { RawSignal } from "./types.js";
 
@@ -92,8 +93,8 @@ export function heuristicAnalysis(inp: CalculationInput, signals: RawSignal[]): 
     related_opportunity_labels: opp.slice(0, 6),
     risks,
     confidence_reasoning:
-      `Confidence is moderated by mock or partial evidence counts (${signals.length} snippets). ` +
-      "Increase confidence when Apify returns wider retailer and social corroboration.",
+      `Confidence is moderated by heuristic / partial evidence (${signals.length} snippets). ` +
+      "Increase confidence when attaching live retailer or social corroboration.",
     evidence_linked_summary: signals.slice(0, 4).map((s) => {
       const sn = s.snippet;
       return sn.length > 200 ? `${sn.slice(0, 200)}…` : sn;
@@ -110,12 +111,14 @@ export async function inferTrends(
 
   const client = new Anthropic({ apiKey });
   const model = process.env.CLAUDE_MODEL?.trim() || "claude-sonnet-4-6";
-  const bullets = signals
-    .slice(0, 20)
-    .map((s) => `[${s.source_type}] ${s.title}: ${s.snippet.slice(0, 400)}`);
-
-  void bullets;
+  void signals;
   const userPrompt = userContentForAgentFromCalculation(inp);
+
+  const tPrimary = Date.now();
+  focLog("inferTrends_primary_start", {
+    model,
+    user_chars: userPrompt.length,
+  });
 
   const first = await client.messages.create({
     model,
@@ -127,10 +130,24 @@ export async function inferTrends(
   });
 
   const rawText = textContent(first);
+  const stopPrimary = "stop_reason" in first ? String((first as { stop_reason?: unknown }).stop_reason) : undefined;
+  focLog("inferTrends_primary_done", {
+    ms: Date.now() - tPrimary,
+    assistant_chars: rawText.length,
+    stop_reason: stopPrimary,
+    parse_attempt: true,
+  });
+
   try {
     const data = extractJsonBlob(rawText);
-    return claudeTrendAnalysisSchema.parse(data);
-  } catch {
+    const parsed = claudeTrendAnalysisSchema.parse(data);
+    focLog("inferTrends_parsed_primary", {});
+    return parsed;
+  } catch (parseErr) {
+    focLog("inferTrends_retry_coerce_json", {
+      err: parseErr instanceof Error ? parseErr.message.slice(0, 200) : String(parseErr),
+    });
+    const tFix = Date.now();
     const fix = await client.messages.create({
       model,
       max_tokens: 900,
@@ -145,7 +162,15 @@ export async function inferTrends(
       ],
     });
     const txt2 = textContent(fix);
+    const stopFix = "stop_reason" in fix ? String((fix as { stop_reason?: unknown }).stop_reason) : undefined;
+    focLog("inferTrends_coerce_done", {
+      ms: Date.now() - tFix,
+      assistant_chars: txt2.length,
+      stop_reason: stopFix,
+    });
     const data2 = extractJsonBlob(txt2);
-    return claudeTrendAnalysisSchema.parse(data2);
+    const out = claudeTrendAnalysisSchema.parse(data2);
+    focLog("inferTrends_parsed_coerce", {});
+    return out;
   }
 }

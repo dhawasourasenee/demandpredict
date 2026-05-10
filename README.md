@@ -2,15 +2,13 @@
 
 Frontend-first Vercel app for the AI Fashion Opportunity Calculator. The React UI lives in
 `apps/web`, shared logic lives in `packages/*`, and Vercel functions under `api/` keep
-AI credentials server-side while Claude reaches Apify through Anthropic's remote MCP connector.
+AI credentials server-side; the calculation API calls **Claude** (Anthropic Messages API) only—no remote MCP / Apify tooling in this path.
 
 ## Prerequisites
 
 - Node 18+ and `pnpm` (`npx pnpm@9.15.4` works if Corepack symlinks fail).
-- Vercel environment variables for live AI/tool calls:
-  - `ANTHROPIC_API_KEY`
-  - `APIFY_TOKEN` for the Apify hosted MCP server
-  - `APIFY_MCP_URL` optional, defaults to `https://mcp.apify.com/?tools=apify/instagram-hashtag-scraper,apify/google-search-scraper`
+- Vercel environment variables for calculations:
+  - `ANTHROPIC_API_KEY` (required for Claude)
   - `CLAUDE_MODEL` optional, defaults to `claude-sonnet-4-6`
 
 ## Install
@@ -30,9 +28,8 @@ pnpm --filter @foc/web dev
 
 - Web: http://localhost:5173
 - API functions: same-origin `/api/*` in production; Vite proxies `/api/*` to Vercel dev locally.
-- **HTTPS flow**: the SPA sends planner JSON via **HTTPS POST** to `/api/calculations`. The Vercel function holds `ANTHROPIC_API_KEY` / `APIFY_TOKEN`, invokes **Claude** with Anthropic's remote MCP connector, and Claude connects to the **Apify hosted MCP server**. The app no longer calls Apify actors directly. Do **not** call Anthropic or Apify from the browser with API keys.
-- If `ANTHROPIC_API_KEY` is missing, the calculator uses heuristic analysis.
-- If `APIFY_TOKEN` is missing, the calculator uses heuristic analysis instead of attempting MCP tool calls.
+- **HTTPS flow**: the SPA sends planner JSON via **HTTPS POST** to `/api/calculations`. The Vercel function holds `ANTHROPIC_API_KEY` and calls **Claude** on the server. Do **not** put API keys in the browser bundle.
+- If `ANTHROPIC_API_KEY` is missing, the calculator falls back to heuristic analysis.
 
 ## Build
 

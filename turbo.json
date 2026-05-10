@@ -1,11 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalEnv": [
-    "ANTHROPIC_API_KEY",
-    "APIFY_TOKEN",
-    "APIFY_MCP_URL",
-    "CLAUDE_MODEL"
-  ],
+  "globalEnv": ["ANTHROPIC_API_KEY", "CLAUDE_MODEL"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

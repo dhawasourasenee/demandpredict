@@ -218,12 +218,12 @@ export default function CalculatorPage() {
         <section className="mb-10 rounded border border-neutral-200 bg-neutral-50/80 px-4 py-3">
           <div className="mb-2 flex items-center gap-2">
             <h2 className="text-sm font-semibold text-neutral-900">How the request works</h2>
-            <InfoTip label="Your browser sends one HTTPS POST (JSON) to /api/calculations with planner fields plus optional agent instructions. The server adds Anthropic and Apify credentials, runs Claude with tools, and returns the report JSON. Keys never ship to the client." />
+            <InfoTip label="Your browser sends one HTTPS POST (JSON) to /api/calculations with planner fields. The server uses your Anthropic API key only on the backend and returns structured report JSON. Keys never ship to the client." />
           </div>
           <p className="text-[13px] leading-relaxed text-neutral-700">
             Calculate uses a secure <span className="font-medium text-neutral-900">HTTPS</span> request to your
-            deployment&apos;s API route—not a direct browser call to Anthropic. Claude runs on the server, calls Apify-backed
-            tools when needed, and the response is sent back over HTTPS.
+            deployment&apos;s API route—not a direct browser call to Anthropic. Claude runs on the server and sends the
+            response back over HTTPS.
           </p>
         </section>
 

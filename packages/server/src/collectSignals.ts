@@ -19,7 +19,7 @@ export function collectMockSignals(inp: CalculationInput, requestId: string): Ra
       url: `https://example.invalid/evidence/${requestId}/${i}`,
       snippet: [
         `Editorial signal for ${inp.item} in ${inp.market} ${inp.region.trim()}.`,
-        "Keywords align with planner context; treat as illustrative until live Apify feeds run.",
+        "Keywords align with planner context; treat as illustrative mock evidence.",
       ].join(" "),
       published_at: published,
       trend_keywords: [...baseKw],
@@ -29,7 +29,7 @@ export function collectMockSignals(inp: CalculationInput, requestId: string): Ra
   return signals;
 }
 
-/** Placeholder: Apify token does not change behavior yet (parity with Python API). */
-export function collectSignals(inp: CalculationInput, _apifyToken: string, requestId: string): RawSignal[] {
+/** Placeholder expanded queries → mock snippets (no external scrapers wired). */
+export function collectSignals(inp: CalculationInput, _ignoredToken: string, requestId: string): RawSignal[] {
   return collectMockSignals(inp, requestId);
 }
