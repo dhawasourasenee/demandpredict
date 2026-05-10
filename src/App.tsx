@@ -1,11 +1,15 @@
-import { useCallback, useEffect, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { LandingUpload } from "./components/LandingUpload";
 import { BusinessContextForm } from "./components/BusinessContextForm";
 import { ProcessingView } from "./components/ProcessingView";
-import { OpportunityReportView } from "./components/OpportunityReport";
 import { Article } from "@phosphor-icons/react";
 import { analyzeGarmentOpportunity, fileToBase64 } from "./lib/analyzeApi";
 import type { BusinessContext, OpportunityReport } from "./lib/types";
+
+const OpportunityReportView = lazy(async () => {
+  const m = await import("./components/OpportunityReport");
+  return { default: m.OpportunityReportView };
+});
 
 type Step = "upload" | "context" | "processing" | "report";
 
@@ -95,12 +99,20 @@ export default function App() {
         {step === "processing" ? <ProcessingView active /> : null}
 
         {step === "report" && report && context ? (
-          <OpportunityReportView
-            context={context}
-            report={report}
-            imagePreviewUrl={previewUrl}
-            onReset={reset}
-          />
+          <Suspense
+            fallback={
+              <div className="report-suspense-fallback" role="status">
+                loading your editorial report…
+              </div>
+            }
+          >
+            <OpportunityReportView
+              context={context}
+              report={report}
+              imagePreviewUrl={previewUrl}
+              onReset={reset}
+            />
+          </Suspense>
         ) : null}
       </main>
     </div>

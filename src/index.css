@@ -726,12 +726,92 @@ button {
   line-height: 1.45;
 }
 
+.report-suspense-fallback {
+  max-width: 480px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+}
+
 .report-notion {
   overflow: hidden;
   border: 1px solid rgba(15, 23, 42, 0.08);
   border-radius: var(--radius-lg);
-  background: var(--surface);
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+  background: linear-gradient(180deg, #faf9fc 0%, #f3f2f8 100%);
+  box-shadow: 0 4px 24px rgba(74, 78, 105, 0.07);
+}
+
+/* Journal / bento blocks (Open Doodles + pastel inset) */
+.section-bento {
+  padding: 1rem 1.25rem 1.15rem;
+  border-bottom: none;
+}
+
+.report-journal-card {
+  position: relative;
+  border-radius: 28px;
+  border: 1px solid rgba(74, 78, 105, 0.16);
+  padding: 1.1rem 1.15rem 1.2rem;
+  background: linear-gradient(155deg, #fdfdff 0%, #f2f1f8 45%, #ebe8f4 100%);
+  box-shadow: 0 8px 32px rgba(74, 78, 105, 0.11);
+  overflow: visible;
+}
+
+.report-journal-doodle {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.4rem;
+  z-index: 2;
+  pointer-events: none;
+  filter: drop-shadow(0 3px 6px rgba(74, 78, 105, 0.12));
+  opacity: 0.96;
+}
+
+@media (max-width: 520px) {
+  .report-journal-doodle {
+    opacity: 0.55;
+    transform: scale(0.85);
+    transform-origin: top right;
+  }
+}
+
+.report-journal-inset {
+  position: relative;
+  z-index: 0;
+  border-radius: 20px;
+  padding: 1.1rem 1.05rem 1.15rem;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    0 1px 3px rgba(74, 78, 105, 0.06);
+}
+
+.report-journal-card--lavender .report-journal-inset {
+  background: linear-gradient(175deg, #e8eaf6 0%, #dde0f0 50%, #d2d6ea 100%);
+}
+
+.report-journal-card--mint .report-journal-inset {
+  background: linear-gradient(175deg, #ecfdf5 0%, #d1fae5 55%, #a7f3d0 100%);
+}
+
+.report-journal-card--peach .report-journal-inset {
+  background: linear-gradient(175deg, #fff7ed 0%, #ffedd5 50%, #fed7aa 100%);
+}
+
+.report-journal-card--sky .report-journal-inset {
+  background: linear-gradient(175deg, #eff6ff 0%, #dbeafe 55%, #bfdbfe 100%);
+}
+
+.report-bento-hero--journal {
+  border-bottom: none;
+  background: transparent;
+  padding: 0.25rem 0.05rem 0.1rem;
 }
 
 .report-bento-hero {
@@ -791,20 +871,18 @@ button {
 @media (min-width: 1024px) {
   .report-split-band {
     display: grid;
-    grid-template-columns: 1.08fr 0.92fr;
-    gap: 0;
+    grid-template-columns: 1.02fr 0.98fr;
+    gap: 1rem;
     align-items: stretch;
-    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    padding: 0 1.15rem 1rem;
+    border-bottom: none;
   }
 
   .report-split-band .section-split {
     border-bottom: none;
-    border-right: 1px solid rgba(15, 23, 42, 0.08);
-    margin: 0;
-  }
-
-  .report-split-band .section-split:last-child {
     border-right: none;
+    margin: 0;
+    padding: 0;
   }
 }
 
@@ -1063,6 +1141,12 @@ button {
   margin-top: 0.2rem;
 }
 
+.hero-bento-stats .stat-block {
+  padding: 0.4rem 0.55rem;
+  border-radius: var(--radius-sm);
+  transition: background 0.2s ease;
+}
+
 .section-tight {
   padding-top: 1.5rem;
 }
@@ -1085,11 +1169,37 @@ button {
 
 .fin-card-bento {
   grid-column: span 4;
-  background: var(--surface);
+  background: rgba(255, 255, 255, 0.72);
   padding: 1.15rem 1.25rem;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: var(--radius-sm);
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: var(--radius);
+  box-shadow: 0 2px 10px rgba(74, 78, 105, 0.07);
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    background 0.22s ease,
+    border-color 0.22s ease;
+}
+
+@media (hover: hover) {
+  .fin-card-bento:hover {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(129, 140, 248, 0.35);
+    box-shadow: 0 10px 28px rgba(99, 102, 241, 0.15);
+  }
+}
+
+.fin-card-bento.fin-card-highlight {
+  background: rgba(255, 255, 255, 0.55);
+  border-color: rgba(16, 185, 129, 0.28);
+}
+
+@media (hover: hover) {
+  .fin-card-bento.fin-card-highlight:hover {
+    background: rgba(236, 253, 245, 0.95);
+    border-color: rgba(16, 185, 129, 0.45);
+    box-shadow: 0 10px 28px rgba(16, 185, 129, 0.14);
+  }
 }
 
 .fin-card-bento:nth-child(1) {
@@ -1427,6 +1537,16 @@ button {
   gap: 0;
   border-bottom: 1px solid var(--border);
   background: var(--surface);
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+@media (hover: hover) {
+  .evidence-row:hover {
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: inset 0 0 0 1px rgba(45, 212, 191, 0.25);
+  }
 }
 
 .evidence-row:last-child {
@@ -1591,13 +1711,25 @@ button {
 
 .opp-card {
   padding: 1.1rem 1.15rem;
-  background: var(--lavender);
-  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.9);
   border-radius: var(--radius);
   display: flex;
   flex-direction: column;
   min-height: 140px;
-  box-shadow: var(--shadow-soft);
+  box-shadow: 0 4px 16px rgba(74, 78, 105, 0.08);
+  transition:
+    box-shadow 0.22s ease,
+    border-color 0.22s ease,
+    background 0.22s ease;
+}
+
+@media (hover: hover) {
+  .opp-card:hover {
+    background: rgba(255, 255, 255, 0.92);
+    border-color: rgba(96, 165, 250, 0.45);
+    box-shadow: 0 12px 32px rgba(96, 165, 250, 0.18);
+  }
 }
 
 .opp-card-title {

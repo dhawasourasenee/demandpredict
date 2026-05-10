@@ -12,6 +12,18 @@ import {
   TShirt,
   Warning,
 } from "@phosphor-icons/react";
+import {
+  ChillingDoodle,
+  CoffeeDoodle,
+  FloatDoodle,
+  GroovyDoodle,
+  IceCreamDoodle,
+  LovingDoodle,
+  MeditatingDoodle,
+  PlantDoodle,
+  ReadingDoodle,
+  SittingReadingDoodle,
+} from "react-open-doodles";
 import type { BusinessContext, OpportunityReport as Report } from "../lib/types";
 import {
   currencySymbol,
@@ -20,6 +32,7 @@ import {
   opportunityComposite,
 } from "../lib/format";
 import { MomentumChart } from "./MomentumChart";
+import { ReportJournalCard } from "./ReportJournalCard";
 
 type PhosphorIcon = ComponentType<{
   size?: number;
@@ -45,8 +58,24 @@ function NotionSectionTitle({
 
 const hoverLift = {
   whileHover: {
-    y: -3,
+    y: -4,
     transition: { type: "spring" as const, stiffness: 420, damping: 26 },
+  },
+};
+
+const finPop = {
+  whileHover: {
+    y: -6,
+    scale: 1.028,
+    transition: { type: "spring" as const, stiffness: 520, damping: 22 },
+  },
+};
+
+const oppPop = {
+  whileHover: {
+    y: -7,
+    rotate: -0.6,
+    transition: { type: "spring" as const, stiffness: 400, damping: 20 },
   },
 };
 
@@ -208,48 +237,74 @@ export function OpportunityReportView({
         </motion.div>
       </div>
 
-      <div
-        className={`report-bento-hero${imagePreviewUrl ? "" : " report-bento-hero--no-media"}`}
-      >
-        {imagePreviewUrl ? (
-          <motion.div
-            className="hero-bento-media"
-            {...hoverLift}
-            whileHover={{ y: -4, rotate: -0.8 }}
-            transition={{ type: "spring", stiffness: 380, damping: 24 }}
+      <section className="section section-bento section-tight">
+        <ReportJournalCard
+          tone="lavender"
+          doodle={PlantDoodle}
+          doodleInk="#4a4e69"
+          doodleAccent="#a78bfa"
+        >
+          <div
+            className={`report-bento-hero report-bento-hero--journal${imagePreviewUrl ? "" : " report-bento-hero--no-media"}`}
           >
-            <img src={imagePreviewUrl} alt="" className="report-hero-thumb" />
-          </motion.div>
-        ) : null}
-        <div className="hero-bento-main">
-          <h1 className="report-title">{headline}</h1>
-          <p className="report-sub">{subline}</p>
-        </div>
-        <div className="header-stats hero-bento-stats">
-          <motion.div className="stat-block" {...hoverLift}>
-            <div className="stat-label">Trend status</div>
-            <div className="stat-value">{o.status || "—"}</div>
-          </motion.div>
-          <motion.div className="stat-block" {...hoverLift}>
-            <div className="stat-label">Confidence</div>
-            <div className="stat-value">{heroConfidenceScore(t.confidence_score)}</div>
-          </motion.div>
-          <motion.div className="stat-block" {...hoverLift}>
-            <div className="stat-label">Opportunity score</div>
-            <div className="stat-value">{oppScore}</div>
-          </motion.div>
-        </div>
-      </div>
+            {imagePreviewUrl ? (
+              <motion.div
+                className="hero-bento-media"
+                whileHover={{ y: -6, rotate: -1.2, scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 380, damping: 22 }}
+              >
+                <img src={imagePreviewUrl} alt="" className="report-hero-thumb" />
+              </motion.div>
+            ) : null}
+            <div className="hero-bento-main">
+              <h1 className="report-title">{headline}</h1>
+              <p className="report-sub">{subline}</p>
+            </div>
+            <div className="header-stats hero-bento-stats">
+              <motion.div
+                className="stat-block"
+                whileHover={{ y: -3, backgroundColor: "rgba(255,255,255,0.5)" }}
+                transition={{ type: "spring", stiffness: 450, damping: 24 }}
+              >
+                <div className="stat-label">Trend status</div>
+                <div className="stat-value">{o.status || "—"}</div>
+              </motion.div>
+              <motion.div
+                className="stat-block"
+                whileHover={{ y: -3, backgroundColor: "rgba(255,255,255,0.5)" }}
+                transition={{ type: "spring", stiffness: 450, damping: 24 }}
+              >
+                <div className="stat-label">Confidence</div>
+                <div className="stat-value">{heroConfidenceScore(t.confidence_score)}</div>
+              </motion.div>
+              <motion.div
+                className="stat-block"
+                whileHover={{ y: -3, backgroundColor: "rgba(255,255,255,0.5)" }}
+                transition={{ type: "spring", stiffness: 450, damping: 24 }}
+              >
+                <div className="stat-label">Opportunity score</div>
+                <div className="stat-value">{oppScore}</div>
+              </motion.div>
+            </div>
+          </div>
+        </ReportJournalCard>
+      </section>
 
-      <section className="section section-tight">
-        <NotionSectionTitle Icon={CoinVertical}>financial summary</NotionSectionTitle>
-        <div className="report-fin-bento">
-          {finCards.map((c) => (
-            <motion.div
-              key={c.label}
-              className={`fin-card fin-card-bento${c.highlight ? " fin-card-highlight" : ""}`}
-              {...hoverLift}
-            >
+      <section className="section section-bento section-tight">
+        <ReportJournalCard
+          tone="peach"
+          doodle={CoffeeDoodle}
+          doodleInk="#4a4e69"
+          doodleAccent="#fb923c"
+        >
+          <NotionSectionTitle Icon={CoinVertical}>financial summary</NotionSectionTitle>
+          <div className="report-fin-bento">
+            {finCards.map((c) => (
+              <motion.div
+                key={c.label}
+                className={`fin-card fin-card-bento${c.highlight ? " fin-card-highlight" : ""}`}
+                {...finPop}
+              >
               <span className="label">{c.label}</span>
               <p className="fin-card-value">{c.value}</p>
               <p className="fin-card-note">{c.note}</p>
@@ -258,18 +313,32 @@ export function OpportunityReportView({
               ) : null}
             </motion.div>
           ))}
-        </div>
+          </div>
+        </ReportJournalCard>
       </section>
 
       {sellThrough ? (
-        <section className="section section-tight">
-          <NotionSectionTitle Icon={Percent}>sell-through analysis</NotionSectionTitle>
-          <p className="section-kicker">
-            Planner assumption vs AI research-based expectation for this SKU. Incremental revenue in the
-            grid above uses your planner sell-through; figures below show the same opportunity at the
-            AI-expected rate.
-          </p>
-          <motion.div className="sell-through-panel" {...hoverLift}>
+        <section className="section section-bento section-tight">
+          <ReportJournalCard
+            tone="sky"
+            doodle={ReadingDoodle}
+            doodleInk="#334155"
+            doodleAccent="#38bdf8"
+          >
+            <NotionSectionTitle Icon={Percent}>sell-through analysis</NotionSectionTitle>
+            <p className="section-kicker">
+              Planner assumption vs AI research-based expectation for this SKU. Incremental revenue in the
+              grid above uses your planner sell-through; figures below show the same opportunity at the
+              AI-expected rate.
+            </p>
+            <motion.div
+              className="sell-through-panel"
+              whileHover={{
+                scale: 1.01,
+                boxShadow: "0 12px 36px rgba(56, 189, 248, 0.18)",
+              }}
+              transition={{ type: "spring", stiffness: 380, damping: 24 }}
+            >
             <div className="st-metrics">
               <motion.div className="st-metric" {...hoverLift}>
                 <span className="label">Planner sell-through</span>
@@ -324,13 +393,20 @@ export function OpportunityReportView({
                 </ul>
               </div>
             ) : null}
-          </motion.div>
+            </motion.div>
+          </ReportJournalCard>
         </section>
       ) : null}
 
       <div className="report-split-band">
-      <section className="section section-split">
-        <NotionSectionTitle Icon={ChartLineUp}>trend scores</NotionSectionTitle>
+      <section className="section section-split section-bento">
+        <ReportJournalCard
+          tone="peach"
+          doodle={FloatDoodle}
+          doodleInk="#4a4e69"
+          doodleAccent="#f472b6"
+        >
+          <NotionSectionTitle Icon={ChartLineUp}>trend scores</NotionSectionTitle>
         <div className="trend-bars">
           {(bars && bars.length
             ? bars
@@ -381,10 +457,17 @@ export function OpportunityReportView({
             </motion.div>
           ))}
         </div>
+        </ReportJournalCard>
       </section>
 
-      <section className="section section-split">
-        <NotionSectionTitle Icon={Stack}>assortment analysis</NotionSectionTitle>
+      <section className="section section-split section-bento">
+        <ReportJournalCard
+          tone="mint"
+          doodle={LovingDoodle}
+          doodleInk="#14532d"
+          doodleAccent="#34d399"
+        >
+          <NotionSectionTitle Icon={Stack}>assortment analysis</NotionSectionTitle>
         {asst ? (
           <div className="assortment-dash">
             {asst.adoption_stage ? (
@@ -421,21 +504,35 @@ export function OpportunityReportView({
             </p>
           </div>
         )}
+        </ReportJournalCard>
       </section>
       </div>
 
       {trendline && trendline.points?.length ? (
-        <section className="section">
-          <MomentumChart
-            title={trendline.title}
-            subtitle={trendline.subtitle}
-            points={trendline.points}
-          />
+        <section className="section section-bento">
+          <ReportJournalCard
+            tone="sky"
+            doodle={MeditatingDoodle}
+            doodleInk="#3730a3"
+            doodleAccent="#818cf8"
+          >
+            <MomentumChart
+              title={trendline.title}
+              subtitle={trendline.subtitle}
+              points={trendline.points}
+            />
+          </ReportJournalCard>
         </section>
       ) : null}
 
-      <section className="section">
-        <NotionSectionTitle Icon={TShirt}>ai garment understanding</NotionSectionTitle>
+      <section className="section section-bento">
+        <ReportJournalCard
+          tone="peach"
+          doodle={IceCreamDoodle}
+          doodleInk="#4a4e69"
+          doodleAccent="#f9a8d4"
+        >
+          <NotionSectionTitle Icon={TShirt}>ai garment understanding</NotionSectionTitle>
         <div className="attr-grid">
           <div className="attr-block">
             <dl style={{ margin: 0 }}>
@@ -474,11 +571,18 @@ export function OpportunityReportView({
             </div>
           </div>
         </div>
+        </ReportJournalCard>
       </section>
 
-      <section className="section">
-        <NotionSectionTitle Icon={Article}>opportunity narrative</NotionSectionTitle>
-        <div className="prose">
+      <section className="section section-bento">
+        <ReportJournalCard
+          tone="lavender"
+          doodle={SittingReadingDoodle}
+          doodleInk="#4a4e69"
+          doodleAccent="#c084fc"
+        >
+          <NotionSectionTitle Icon={Article}>opportunity narrative</NotionSectionTitle>
+          <div className="prose">
           {o.assortment_recommendation
             .split(/\n+/)
             .filter(Boolean)
@@ -498,11 +602,18 @@ export function OpportunityReportView({
               <strong>Suggested units:</strong> {o.recommended_units}
             </p>
           ) : null}
-        </div>
+          </div>
+        </ReportJournalCard>
       </section>
 
-      <section className="section">
-        <NotionSectionTitle Icon={Books}>evidence summary</NotionSectionTitle>
+      <section className="section section-bento">
+        <ReportJournalCard
+          tone="mint"
+          doodle={GroovyDoodle}
+          doodleInk="#14532d"
+          doodleAccent="#2dd4bf"
+        >
+          <NotionSectionTitle Icon={Books}>evidence summary</NotionSectionTitle>
         <p className="section-kicker">
           Evidence is grounded in OpenAI-hosted web search when the API runs with a model that supports
           the Responses API <code className="inline-code">web_search</code> tool.
@@ -538,10 +649,17 @@ export function OpportunityReportView({
         ) : (
           <p className="prose">No evidence rows returned.</p>
         )}
+        </ReportJournalCard>
       </section>
 
-      <section className="section">
-        <NotionSectionTitle Icon={Warning}>risk assessment</NotionSectionTitle>
+      <section className="section section-bento">
+        <ReportJournalCard
+          tone="peach"
+          doodle={ChillingDoodle}
+          doodleInk="#4a4e69"
+          doodleAccent="#fb7185"
+        >
+          <NotionSectionTitle Icon={Warning}>risk assessment</NotionSectionTitle>
         <div className="risk-list">
           {report.risks?.length
             ? report.risks.map((r) => (
@@ -561,11 +679,25 @@ export function OpportunityReportView({
               ))
             : "—"}
         </div>
+        </ReportJournalCard>
       </section>
 
-      <section className="section">
-        <NotionSectionTitle Icon={SealCheck}>recommendation</NotionSectionTitle>
-        <motion.div className="rec-box rec-box-featured" {...hoverLift}>
+      <section className="section section-bento">
+        <ReportJournalCard
+          tone="lavender"
+          doodle={LovingDoodle}
+          doodleInk="#4a1d96"
+          doodleAccent="#e879f9"
+        >
+          <NotionSectionTitle Icon={SealCheck}>recommendation</NotionSectionTitle>
+          <motion.div
+            className="rec-box rec-box-featured"
+            whileHover={{
+              y: -5,
+              boxShadow: "0 16px 40px rgba(232, 121, 249, 0.2)",
+            }}
+            transition={{ type: "spring", stiffness: 380, damping: 22 }}
+          >
           {report.final_recommendation.headline ? (
             <h3 className="rec-headline">{report.final_recommendation.headline}</h3>
           ) : null}
@@ -594,15 +726,22 @@ export function OpportunityReportView({
               </p>
             </>
           ) : null}
-        </motion.div>
+          </motion.div>
+        </ReportJournalCard>
       </section>
 
-      <section className="section">
-        <NotionSectionTitle Icon={GridFour}>related opportunities</NotionSectionTitle>
-        <div className="opp-card-grid">
-          {report.related_opportunities?.length
-            ? report.related_opportunities.map((rel) => (
-                <motion.div key={rel.category} className="opp-card" {...hoverLift}>
+      <section className="section section-bento">
+        <ReportJournalCard
+          tone="sky"
+          doodle={FloatDoodle}
+          doodleInk="#1e3a5f"
+          doodleAccent="#60a5fa"
+        >
+          <NotionSectionTitle Icon={GridFour}>related opportunities</NotionSectionTitle>
+          <div className="opp-card-grid">
+            {report.related_opportunities?.length
+              ? report.related_opportunities.map((rel) => (
+                  <motion.div key={rel.category} className="opp-card" {...oppPop}>
                   <div className="opp-card-title">{rel.category}</div>
                   <p className="opp-card-reason">{rel.reason}</p>
                   <div className="opp-card-footer">
@@ -610,10 +749,11 @@ export function OpportunityReportView({
                       {rel.tag || rel.momentum || "—"}
                     </span>
                   </div>
-                </motion.div>
-              ))
-            : "—"}
-        </div>
+                  </motion.div>
+                ))
+              : "—"}
+          </div>
+        </ReportJournalCard>
       </section>
 
       {report.report_metadata &&
