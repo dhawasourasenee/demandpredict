@@ -1,10 +1,6 @@
 import type { BusinessContext, OpportunityReport as Report } from "../lib/types";
-import {
-  currencySymbol,
-  formatMoney,
-  opportunityComposite,
-  saturationLabel,
-} from "../lib/format";
+import { currencySymbol, formatMoney, opportunityComposite } from "../lib/format";
+import { MomentumChart } from "./MomentumChart";
 
 type Props = {
   context: BusinessContext;
@@ -27,10 +23,14 @@ export function OpportunityReportView({
 }: Props) {
   const { garment_analysis: g, trend_analysis: t, opportunity_analysis: o } =
     report;
-  const sym = currencySymbol(context.region);
   const oppScore = opportunityComposite(report);
   const gap = o.opportunity_gap_percent;
   const gapPct = gap > 0 ? `+${gap}%` : `${gap}%`;
+  const sym = currencySymbol(context.region);
+  const fin = report.financial_summary;
+  const bars = report.trend_score_bars;
+  const asst = report.assortment_dashboard;
+  const trendline = report.momentum_trendline;
 
   const marketPoss =
     context.market.length > 0
@@ -44,6 +44,84 @@ export function OpportunityReportView({
     .trim() || "Garment opportunity";
 
   const subline = `${context.region} ${context.target_customer} market · ${context.season}`;
+
+  const finCards = fin
+    ? [
+        {
+          label: "Avg selling price",
+          value: `${fin.currency_symbol}${fin.average_selling_price.toLocaleString()}`,
+          note: fin.average_selling_price_caption,
+          highlight: false,
+        },
+        {
+          label: "Planned units",
+          value: String(fin.planned_units),
+          note: fin.planned_units_caption,
+          highlight: false,
+        },
+        {
+          label: "Planned mix",
+          value: `${fin.planned_mix_percent}%`,
+          note: fin.planned_mix_caption,
+          highlight: false,
+        },
+        {
+          label: "Recommended mix",
+          value: `${fin.recommended_mix_percent}%`,
+          note: fin.recommended_mix_caption,
+          highlight: true,
+        },
+        {
+          label: "Opportunity gap",
+          value: `${fin.opportunity_gap_percent > 0 ? "+" : ""}${fin.opportunity_gap_percent}%`,
+          note: fin.opportunity_gap_caption,
+          highlight: true,
+        },
+        {
+          label: "Incremental revenue",
+          value: fin.incremental_revenue_compact,
+          note: fin.incremental_revenue_caption,
+          highlight: true,
+        },
+      ]
+    : [
+        {
+          label: "Avg selling price",
+          value: `${sym}${context.average_selling_price}`,
+          note: "Per unit",
+          highlight: false,
+        },
+        {
+          label: "Planned units",
+          value: String(context.planned_units),
+          note: `${context.season} forecast`,
+          highlight: false,
+        },
+        {
+          label: "Planned mix",
+          value: `${context.planned_assortment_mix_percent}%`,
+          note: o.mix_assortment_context || "Of assortment",
+          highlight: false,
+        },
+        {
+          label: "Recommended mix",
+          value: `${o.recommended_mix_percent ?? "—"}%`,
+          note: "AI-adjusted target",
+          highlight: true,
+        },
+        {
+          label: "Opportunity gap",
+          value: gapPct,
+          note: gapDescriptor(gap),
+          highlight: true,
+        },
+        {
+          label: "Incremental revenue",
+          value: formatMoney(o.incremental_sales_opportunity, context),
+          note: `At ${context.expected_sell_through_percent}% sell-through`,
+          highlight: true,
+        },
+      ];
 
   return (
     <div className="card" style={{ overflow: "hidden" }}>
@@ -103,32 +181,119 @@ export function OpportunityReportView({
         </div>
       </div>
 
-      <div className="kpi-row">
-        <div className="kpi-cell">
-          <span className="label">Opportunity gap</span>
-          <p className="kpi-value">{gapPct}</p>
-          <p className="kpi-note">{gapDescriptor(gap)}</p>
+      <section className="section section-tight">
+        <h2 className="section-title">Financial summary</h2>
+        <div className="fin-summary-grid">
+          {finCards.map((c) => (
+            <div
+              key={c.label}
+              className={`fin-card${c.highlight ? " fin-card-highlight" : ""}`}
+            >
+              <span className="label">{c.label}</span>
+              <p className="fin-card-value">{c.value}</p>
+              <p className="fin-card-note">{c.note}</p>
+            </div>
+          ))}
         </div>
-        <div className="kpi-cell">
-          <span className="label">Recommended mix</span>
-          <p className="kpi-value">{o.recommended_mix_percent ?? "—"}%</p>
-          <p className="kpi-note">
-            vs {context.planned_assortment_mix_percent}% planned
-          </p>
+      </section>
+
+      <section className="section">
+        <h2 className="section-title">Trend scores</h2>
+        <div className="trend-bars">
+          {(bars && bars.length
+            ? bars
+            : [
+                ["Trend strength", t.trend_strength, "positive"],
+                ["Commercial viability", t.commercial_viability, "positive"],
+                ["Momentum", t.momentum_score, "positive"],
+                [
+                  `Regional relevance (${context.region})`,
+                  t.regional_relevance,
+                  "positive",
+                ],
+                [
+                  `Seasonal relevance (${context.season})`,
+                  t.seasonal_relevance,
+                  "caution",
+                ],
+                [
+                  `Customer fit (${context.target_customer})`,
+                  t.customer_fit,
+                  "positive",
+                ],
+                ["Saturation risk", t.saturation_risk, "caution"],
+              ].map(([label, score, tone]) => ({
+                key: String(label),
+                label: String(label),
+                score: Number(score),
+                tone: tone as "positive" | "caution" | "neutral",
+              }))
+          ).map((row) => (
+            <div key={row.key} className="trend-bar-row">
+              <div className="trend-bar-head">
+                <span className="trend-bar-label">{row.label}</span>
+                <span className="trend-bar-score">{row.score}</span>
+              </div>
+              <div className="trend-bar-track">
+                <div
+                  className={`trend-bar-fill trend-bar-${row.tone}`}
+                  style={{ width: `${Math.min(100, Math.max(0, row.score))}%` }}
+                />
+              </div>
+            </div>
+          ))}
         </div>
-        <div className="kpi-cell">
-          <span className="label">Incremental opportunity</span>
-          <p className="kpi-value">
-            {formatMoney(o.incremental_sales_opportunity, context)}
-          </p>
-          <p className="kpi-note">ASP {sym}{context.average_selling_price}</p>
-        </div>
-        <div className="kpi-cell">
-          <span className="label">Saturation risk</span>
-          <p className="kpi-value">{saturationLabel(t.saturation_risk)}</p>
-          <p className="kpi-note">Score {t.saturation_risk}</p>
-        </div>
-      </div>
+      </section>
+
+      <section className="section">
+        <h2 className="section-title">Assortment analysis</h2>
+        {asst ? (
+          <div className="assortment-dash">
+            {asst.adoption_stage ? (
+              <div className="adoption-stage">
+                <span className="label">Adoption stage</span>
+                <p className="adoption-stage-text">{asst.adoption_stage}</p>
+              </div>
+            ) : null}
+            <div className="mix-flow">
+              <div className="mix-box">
+                <span className="label">Planned mix</span>
+                <p className="mix-box-value">{asst.planned_mix_percent}%</p>
+              </div>
+              <span className="mix-arrow" aria-hidden>
+                →
+              </span>
+              <div className="mix-box mix-box-rec">
+                <span className="label">Recommended</span>
+                <p className="mix-box-value">{asst.recommended_mix_percent}%</p>
+              </div>
+            </div>
+            <div className="opportunity-callout">
+              <p className="opportunity-callout-line">{asst.opportunity_summary}</p>
+              <p className="opportunity-callout-line">{asst.incremental_explanation}</p>
+              <p className="calc-formula">{asst.calculation_formula}</p>
+            </div>
+          </div>
+        ) : (
+          <div className="prose">
+            <p>
+              <strong>Gap:</strong> {gapPct} ({gapDescriptor(gap)}).{" "}
+              <strong>Recommended mix:</strong> {o.recommended_mix_percent}% vs{" "}
+              {context.planned_assortment_mix_percent}% planned.
+            </p>
+          </div>
+        )}
+      </section>
+
+      {trendline && trendline.points?.length ? (
+        <section className="section">
+          <MomentumChart
+            title={trendline.title}
+            subtitle={trendline.subtitle}
+            points={trendline.points}
+          />
+        </section>
+      ) : null}
 
       <section className="section">
         <h2 className="section-title">AI garment understanding</h2>
@@ -173,29 +338,7 @@ export function OpportunityReportView({
       </section>
 
       <section className="section">
-        <h2 className="section-title">Trend intelligence</h2>
-        <div className="intel-grid">
-          {[
-            ["Trend strength", t.trend_strength],
-            ["Commercial viability", t.commercial_viability],
-            ["Regional relevance", t.regional_relevance],
-            ["Customer fit", t.customer_fit],
-            ["Momentum", t.momentum_score],
-            ["Seasonal relevance", t.seasonal_relevance],
-            ["Saturation risk", t.saturation_risk],
-          ].map(([label, val]) => (
-            <div key={String(label)} className="intel-card">
-              <span className="label" style={{ marginBottom: 0 }}>
-                {label}
-              </span>
-              <p className="intel-metric">{val}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="section">
-        <h2 className="section-title">Opportunity analysis</h2>
+        <h2 className="section-title">Opportunity narrative</h2>
         <div className="prose">
           {o.assortment_recommendation
             .split(/\n+/)

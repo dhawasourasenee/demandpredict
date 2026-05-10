@@ -95,7 +95,9 @@ You must output ONLY structured JSON matching this exact shape (all keys require
     "incremental_sales_opportunity": 0,
     "recommended_units": 0,
     "assortment_recommendation": "",
-    "priority_level": ""
+    "priority_level": "",
+    "adoption_stage": "",
+    "mix_assortment_context": ""
   },
   "evidence_summary": [
     {
@@ -128,4 +130,10 @@ You must output ONLY structured JSON matching this exact shape (all keys require
 
 Scoring guidance for trend_analysis (0-100 integers): higher is better except saturation_risk where higher means more saturated / riskier.
 
-For opportunity_analysis numeric fields: provide your best estimates; the server will recompute commercial KPIs (gap %, incremental sales, recommended units) deterministically from the buyer context and your recommended_mix_percent — still output coherent recommended_mix_percent and narrative fields."""
+For opportunity_analysis numeric fields: provide your best estimates; the server will recompute commercial KPIs (gap %, incremental sales, recommended units) deterministically from the buyer context and your recommended_mix_percent — still output coherent recommended_mix_percent and narrative fields.
+
+Dashboard copy (required strings):
+- adoption_stage: One concise line on adoption phase, e.g. "Mass adoption (entering peak)" or "Early adoption" — buyer-facing, not poetic.
+- mix_assortment_context: Short label for planned mix footnote, e.g. "Of blazer assortment" or "Of denim outerwear mix" — tie to garment_analysis.category; do not invent unrelated categories.
+
+Do NOT output financial_summary, trend_score_bars, assortment_dashboard, or momentum_trendline — the server builds those for the UI."""

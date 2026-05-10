@@ -40,6 +40,8 @@ export type OpportunityAnalysis = {
   recommended_units: number;
   assortment_recommendation: string;
   priority_level: string;
+  adoption_stage?: string;
+  mix_assortment_context?: string;
 };
 
 export type EvidenceItem = {
@@ -67,6 +69,52 @@ export type FinalRecommendation = {
   commercial_outlook: string;
 };
 
+export type FinancialSummary = {
+  currency_symbol: string;
+  average_selling_price: number;
+  average_selling_price_caption: string;
+  planned_units: number;
+  planned_units_caption: string;
+  planned_mix_percent: number;
+  planned_mix_caption: string;
+  recommended_mix_percent: number;
+  recommended_mix_caption: string;
+  opportunity_gap_percent: number;
+  opportunity_gap_caption: string;
+  incremental_revenue: number;
+  incremental_revenue_compact: string;
+  incremental_revenue_caption: string;
+};
+
+export type TrendScoreBar = {
+  key: string;
+  label: string;
+  score: number;
+  tone: "positive" | "caution" | "neutral";
+};
+
+export type AssortmentDashboard = {
+  adoption_stage: string;
+  mix_context_line: string;
+  planned_mix_percent: number;
+  recommended_mix_percent: number;
+  gap_percent: number;
+  opportunity_summary: string;
+  incremental_explanation: string;
+  calculation_formula: string;
+};
+
+export type MomentumTrendPoint = {
+  date: string;
+  index_value: number;
+};
+
+export type MomentumTrendline = {
+  title: string;
+  subtitle: string;
+  points: MomentumTrendPoint[];
+};
+
 export type OpportunityReport = {
   garment_analysis: GarmentAnalysis;
   trend_analysis: TrendAnalysis;
@@ -75,4 +123,8 @@ export type OpportunityReport = {
   risks: RiskItem[];
   related_opportunities: RelatedOpportunity[];
   final_recommendation: FinalRecommendation;
+  financial_summary?: FinancialSummary;
+  trend_score_bars?: TrendScoreBar[];
+  assortment_dashboard?: AssortmentDashboard;
+  momentum_trendline?: MomentumTrendline;
 };
