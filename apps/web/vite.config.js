@@ -14,5 +14,12 @@ export default defineConfig({
     },
     server: {
         port: 5173,
+        proxy: {
+            // Run `pnpm dev:vercel` so /api/* uses Vercel functions with server-side env vars.
+            "/api": {
+                target: "http://127.0.0.1:3000",
+                changeOrigin: true,
+            },
+        },
     },
 });

@@ -138,7 +138,16 @@ export default function CalculatorPage() {
   const mutation = useMutation({
     mutationFn: (body: CalculationInput) => createCalculation(body),
     onSuccess: (data) => {
-      navigate(`/reports/${data.report_id}`);
+      if (data.report) {
+        try {
+          sessionStorage.setItem(`foc_report_${data.report_id}`, JSON.stringify(data.report));
+        } catch {
+          /* ignore quota / private mode */
+        }
+        navigate(`/reports/${data.report_id}`, { state: { report: data.report } });
+      } else {
+        navigate(`/reports/${data.report_id}`);
+      }
     },
     onError: (err: Error) => setStatusMsg(err.message || "Calculation failed"),
   });

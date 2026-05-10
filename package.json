@@ -5,10 +5,16 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "dev:vercel": "vercel dev",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,json,md}\""
   },
+  "dependencies": {
+    "@foc/server": "workspace:*",
+    "@foc/shared": "workspace:*"
+  },
   "devDependencies": {
+    "@vercel/node": "^3.2.19",
     "prettier": "^3.4.2",
     "turbo": "^2.3.4",
     "typescript": "^5.7.3"

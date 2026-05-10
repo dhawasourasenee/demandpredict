@@ -1,9 +1,15 @@
 import type { CalculationInput } from "@foc/shared";
 
-const BASE = import.meta.env.VITE_API_URL?.replace(/\/$/, "") || "http://127.0.0.1:8000";
+const EXTERNAL = import.meta.env.VITE_API_URL?.trim().replace(/\/$/, "");
+
+/** API path without host, e.g. `/calculations`. Same-origin `/api/...` on Vercel. */
+export function apiUrl(path: string): string {
+  const p = path.startsWith("/") ? path : `/${path}`;
+  return EXTERNAL ? `${EXTERNAL}${p}` : `/api${p}`;
+}
 
 async function fetchJson(path: string, init?: RequestInit) {
-  const res = await fetch(`${BASE}${path}`, {
+  const res = await fetch(apiUrl(path), {
     ...init,
     headers: {
       "Content-Type": "application/json",
@@ -21,7 +27,13 @@ export async function createCalculation(body: CalculationInput) {
   return fetchJson("/calculations", {
     method: "POST",
     body: JSON.stringify(body),
-  }) as Promise<{ calculation_id: string; report_id: string; status: string }>;
+  }) as Promise<{
+    calculation_id: string;
+    report_id: string;
+    status: string;
+    /** Optional eager payload; used to hydrate the report without a second fetch. */
+    report?: Record<string, unknown>;
+  }>;
 }
 
 export async function loadReport(reportId: string) {

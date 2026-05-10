@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 
 import { PageFrame } from "@/components/layout/PageFrame";
 import SaveToSpacesModal from "@/features/reports/SaveToSpacesModal";
@@ -50,16 +50,40 @@ function RelatedDelta({ idx }: { idx: number }) {
 
 export default function ReportPage() {
   const { id } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const reportId = id!;
   const [spacesOpen, setSpacesOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
+  const stateReport = (location.state as { report?: Record<string, unknown> } | undefined)?.report;
+  const sessionReport = useMemo((): Record<string, unknown> | undefined => {
+    try {
+      const raw = sessionStorage.getItem(`foc_report_${reportId}`);
+      if (!raw) return undefined;
+      return JSON.parse(raw) as Record<string, unknown>;
+    } catch {
+      return undefined;
+    }
+  }, [reportId]);
+  const seeded = stateReport ?? sessionReport;
+
   const q = useQuery({
     queryKey: ["report", reportId],
     queryFn: () => loadReport(reportId),
-    enabled: Boolean(reportId),
+    enabled: Boolean(reportId) && !seeded,
   });
+
+  useEffect(() => {
+    if (!reportId || !q.data) return;
+    try {
+      sessionStorage.setItem(`foc_report_${reportId}`, JSON.stringify(q.data));
+    } catch {
+      /* ignore */
+    }
+  }, [q.data, reportId]);
+
+  const data = seeded ?? q.data;
 
   const pdfMutation = useMutation({
     mutationFn: () => exportPdf(reportId),
@@ -70,14 +94,14 @@ export default function ReportPage() {
     onError: (e: Error) => setToast(e.message),
   });
 
-  if (q.isLoading) {
+  if (!data && q.isPending) {
     return (
       <PageFrame>
         <div className="py-24 text-center text-sm text-neutral-600">Loading report…</div>
       </PageFrame>
     );
   }
-  if (q.isError) {
+  if (!data && q.isError) {
     return (
       <PageFrame>
         <div className="py-24 text-center text-sm text-red-700">
@@ -89,8 +113,18 @@ export default function ReportPage() {
       </PageFrame>
     );
   }
-
-  const data = q.data as Record<string, unknown>;
+  if (!data) {
+    return (
+      <PageFrame>
+        <div className="py-24 text-center text-sm text-red-700">
+          Report not available. Start from the calculator or use a link from the same session.
+          <Link to="/" className="mt-4 block text-neutral-900 underline">
+            Back
+          </Link>
+        </div>
+      </PageFrame>
+    );
+  }
   const summary = (data.calculation_summary || {}) as Record<string, unknown>;
   const opp = (data.opportunity_estimation || {}) as Record<string, unknown>;
   const reco = (data.recommendation || {}) as Record<string, unknown>;
