@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/features/calculator/calculatorpage.tsx","./src/features/calculator/category-options.ts","./src/features/reports/reportpage.tsx","./src/lib/api.ts"],"version":"5.9.3"}

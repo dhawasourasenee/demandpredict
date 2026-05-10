@@ -1,0 +1,9 @@
+{
+  "name": "@foc/api",
+  "private": true,
+  "scripts": {
+    "dev": "PYTHONPATH=. python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000",
+    "lint": "PYTHONPATH=. ruff check app",
+    "test": "PYTHONPATH=. pytest"
+  }
+}

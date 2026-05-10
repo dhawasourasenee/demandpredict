@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.turbo/
+*.pyc
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+.env
+.env.local
+apps/api/*.db
+apps/web/.vite/
+coverage/
