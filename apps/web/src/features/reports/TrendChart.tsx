@@ -72,7 +72,7 @@ export default function TrendChart({ data, itemLabel }: Props) {
           Your opportunity
         </span>
         <span className="inline-flex items-center gap-2">
-          <span className="inline-block h-0 w-6 border-t-2 border-dashed border-wgsn-green" />
+          <span className="inline-block h-0 w-6 border-t-2 border-dashed border-accent-green" />
           Opportunity floor
         </span>
       </div>

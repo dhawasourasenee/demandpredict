@@ -24,7 +24,7 @@ def collect_mock_signals(inp: CalculationInputBody, request_id: str) -> list[Raw
                 title=f"Sample coverage: {q[:48]}…",
                 url=f"https://example.invalid/evidence/{request_id}/{i}",
                 snippet=(
-                    f"Editorial signal for {inp.item} in {inp.market.value} {inp.region.value}. "
+                    f"Editorial signal for {inp.item} in {inp.market.value} {inp.region.strip()}. "
                     f"Keywords align with planner context; treat as illustrative until live Apify feeds run."
                 ),
                 published_at=published,

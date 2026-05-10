@@ -5,7 +5,6 @@ from app.schemas.calculation import (
     DateRangeModel,
     Department,
     Market,
-    Region,
 )
 from app.schemas.report_contracts import ClaudeTrendAnalysis
 from app.services.scoring_engine import IndexStatus, compute_scores
@@ -17,7 +16,7 @@ def _sample_input() -> CalculationInputBody:
         market=Market.women,
         department=Department.apparel,
         customer_type=CustomerType.mass,
-        region=Region.US,
+        region="US",
         date_range=DateRangeModel(start="2026-01-01", end="2026-03-31"),
         category="jackets",
         item="blazer",

@@ -4,15 +4,12 @@ export default {
   theme: {
     extend: {
       colors: {
-        wgsn: {
-          nav: "#1a1a1a",
-          subnav: "#f0f0f0",
+        accent: {
           green: "#2E7D32",
-          "green-bright": "#34A853",
+          "green-highlight": "#34A853",
+          muted: "#757575",
           callout: "#e8f5e9",
           "callout-border": "#81c784",
-          muted: "#757575",
-          line: "#bdbdbd",
           inputbg: "#fafafa",
           blue: "#1e88e5",
           lavender: "#c5cae9",

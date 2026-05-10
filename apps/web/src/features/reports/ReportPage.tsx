@@ -2,14 +2,14 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
-import { AppShell } from "@/components/wgsn/AppShell";
+import { PageFrame } from "@/components/layout/PageFrame";
 import SaveToSpacesModal from "@/features/reports/SaveToSpacesModal";
 import TrendChart, { type Pt } from "@/features/reports/TrendChart";
 import { createSpace, exportPdf, loadReport, saveReportToSpace } from "@/lib/api";
 import { formatDmY, regionLabel, titleCase } from "@/lib/format";
 
-function fmtMoney(n: number) {
-  return n.toLocaleString(undefined, { maximumFractionDigits: 0 });
+function fmtInr(n: number) {
+  return n.toLocaleString("en-IN", { maximumFractionDigits: 0 });
 }
 
 function triggerDownload(blob: Blob, filename: string) {
@@ -40,7 +40,7 @@ function RelatedDelta({ idx }: { idx: number }) {
   const r = cycle[idx % cycle.length];
   return (
     <span className="inline-flex items-center gap-1 font-medium">
-      <span className={`text-[10px] ${r.up ? "text-wgsn-green-bright" : "text-red-600"}`}>
+      <span className={`text-[10px] ${r.up ? "text-accent-green-highlight" : "text-red-600"}`}>
         {r.up ? "▲" : "▼"}
       </span>
       {r.v}
@@ -72,21 +72,21 @@ export default function ReportPage() {
 
   if (q.isLoading) {
     return (
-      <AppShell>
+      <PageFrame>
         <div className="py-24 text-center text-sm text-neutral-600">Loading report…</div>
-      </AppShell>
+      </PageFrame>
     );
   }
   if (q.isError) {
     return (
-      <AppShell>
+      <PageFrame>
         <div className="py-24 text-center text-sm text-red-700">
           {(q.error as Error).message}
           <Link to="/" className="mt-4 block text-neutral-900 underline">
             Back
           </Link>
         </div>
-      </AppShell>
+      </PageFrame>
     );
   }
 
@@ -119,7 +119,7 @@ export default function ReportPage() {
 
   const p1 =
     assortment.status === "under_indexed"
-      ? `We project that you are under-indexed for ${itemLabel}. We recommend increasing the mix of ${itemLabel} in your assortment by approximately ${diffPp.toFixed(1)} percentage points versus your planned level, reflecting a directional sales opportunity illustration between $${fmtMoney(inc)} and $${fmtMoney(incHi)} — not guaranteed revenue.`
+      ? `We project that you are under-indexed for ${itemLabel}. We recommend increasing the mix of ${itemLabel} in your assortment by approximately ${diffPp.toFixed(1)} percentage points versus your planned level, reflecting a directional sales opportunity illustration between ₹${fmtInr(inc)} and ₹${fmtInr(incHi)} — not guaranteed revenue.`
       : assortment.status === "over_indexed"
         ? `Signals suggest trimming exposure to ${itemLabel} versus your planned mix (${planned.toFixed(1)}%). Rebalance cautiously alongside inventory and margin realities.`
         : String(reco.summary || aiFallbackSummary(itemLabel, planned, recoMix));
@@ -131,7 +131,7 @@ export default function ReportPage() {
       : String(reco.confidence_reasoning || "");
 
   return (
-    <AppShell>
+    <PageFrame>
       <div className="border-b border-neutral-200 bg-neutral-50 px-6 py-4">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-end gap-3">
           <button
@@ -187,19 +187,19 @@ export default function ReportPage() {
 
         <div className="mb-8 flex flex-wrap gap-12 border-b border-neutral-200 pb-8">
           <div>
-            <p className="text-[34px] font-bold leading-none text-wgsn-green">{planned.toFixed(1)}%</p>
+            <p className="text-[34px] font-bold leading-none text-accent-green">{planned.toFixed(1)}%</p>
             <p className="mt-2 max-w-[280px] text-sm leading-snug text-neutral-700">
               Your assortment mix (%) · planned for this calculation
             </p>
           </div>
           <div>
-            <p className="text-[34px] font-bold leading-none text-wgsn-green">{recoMix.toFixed(1)}%</p>
+            <p className="text-[34px] font-bold leading-none text-accent-green">{recoMix.toFixed(1)}%</p>
             <p className="mt-2 max-w-[280px] text-sm leading-snug text-neutral-700">
               Avg. forecast assortment mix (%) within given date range
             </p>
           </div>
           <div>
-            <p className="text-[34px] font-bold leading-none text-wgsn-green">
+            <p className="text-[34px] font-bold leading-none text-accent-green">
               {(Number(summary.difference_pp || 0) >= 0 ? "+" : "") + Number(summary.difference_pp || 0).toFixed(1)}
               ppt
             </p>
@@ -212,10 +212,10 @@ export default function ReportPage() {
         </div>
 
         <div className="mx-auto mb-14 max-w-2xl rounded-lg bg-white p-8 shadow-card">
-          <p className="mb-4 text-[15px] font-medium text-neutral-900">Incremental sales opportunity</p>
+          <p className="mb-4 text-[15px] font-medium text-neutral-900">Incremental sales opportunity (INR)</p>
           <div className="flex flex-wrap items-baseline gap-2">
-            <span className="text-[52px] font-bold leading-none text-wgsn-green">${fmtMoney(inc)}</span>
-            <span className="text-sm text-wgsn-green/90">Approx.</span>
+            <span className="text-[52px] font-bold leading-none text-accent-green">₹{fmtInr(inc)}</span>
+            <span className="text-sm text-accent-green/90">Approx.</span>
           </div>
           <div className="mt-8 space-y-4 border-t border-neutral-100 pt-4 text-sm">
             <div className="flex justify-between gap-6">
@@ -235,7 +235,7 @@ export default function ReportPage() {
 
         <section className="rounded-lg bg-neutral-100 p-8">
           <div className="mb-6 flex items-start gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-wgsn-green">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent-green">
               <svg className="h-7 w-7 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
                 <path d="M12 21a2 2 0 010-4 8 11 8 11l-8-14h16l-8 14zm0-17l1.5 3h3l-2 2 2 4h-9l2-4-2-2h3l1.5-3z" />
               </svg>
@@ -297,7 +297,7 @@ export default function ReportPage() {
           await saveReportToSpace(s.space_id, reportId);
         }}
       />
-    </AppShell>
+    </PageFrame>
   );
 }
 

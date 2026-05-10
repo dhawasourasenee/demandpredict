@@ -1,8 +1,18 @@
+from typing import Optional
+
 from app.schemas.calculation import CalculationInputBody
 from app.schemas.raw_signal import RawSignal
 from app.schemas.report_contracts import ClaudeTrendAnalysis
 from app.services.scoring_engine import ScoringOutput
 from app.services.trendline_engine import TrendPoint
+
+
+def _pretty_words(s: str, max_len: Optional[int] = None) -> str:
+    t = " ".join(str(s).split()).strip()
+    out = t.title() if t else ""
+    if max_len and len(out) > max_len:
+        return out[: max_len - 1] + "…"
+    return out
 
 
 def build_final_report_payload(
@@ -15,10 +25,10 @@ def build_final_report_payload(
 ) -> dict:
     label = ", ".join(
         [
-            inp.category.title(),
-            inp.item.title(),
+            _pretty_words(inp.category),
+            _pretty_words(inp.item, max_len=140),
             inp.market.value.title(),
-            inp.region.value,
+            inp.region.strip(),
             f"{inp.date_range.start} → {inp.date_range.end}",
         ]
     )
@@ -28,10 +38,10 @@ def build_final_report_payload(
             "title": label,
             "calculation_mode": inp.calculation_type.value,
             "headline": {
-                "item": inp.item.title(),
-                "category": inp.category.title(),
+                "item": _pretty_words(inp.item, max_len=140),
+                "category": _pretty_words(inp.category),
                 "market": inp.market.value.title(),
-                "region": inp.region.value,
+                "region": inp.region.strip(),
                 "start": inp.date_range.start,
                 "end": inp.date_range.end,
             },
@@ -62,7 +72,7 @@ def build_final_report_payload(
         "opportunity_estimation": {
             "incremental_opportunity_estimate": scores.incremental_opportunity_estimate,
             "disclaimer": (
-                "Approximate illustration only—not a revenue guarantee and not sales certainty. "
+                "Approximate INR illustration only—not a revenue guarantee and not sales certainty. "
                 f"Trendline is {'estimated' if trend_estimated_flag else 'evidence-guided'} "
                 "(see point flags)."
             ),

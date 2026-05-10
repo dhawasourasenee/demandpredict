@@ -28,7 +28,7 @@ def expand_queries(inp: CalculationInputBody) -> ExpandResult:
     m = inp.market.value
     item = inp.item
     cat = inp.category
-    region = inp.region.value
+    region = inp.region.strip()
     season = _season_token(inp.date_range.end)
 
     base = f"{m} {item} trend {region}"

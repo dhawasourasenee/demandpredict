@@ -27,12 +27,6 @@ class CustomerType(str, Enum):
     all = "all"
 
 
-class Region(str, Enum):
-    US = "US"
-    EMEA = "EMEA"
-    APAC = "APAC"
-
-
 class DateRangeModel(BaseModel):
     start: str
     end: str
@@ -43,14 +37,21 @@ class CalculationInputBody(BaseModel):
     market: Market
     department: Department
     customer_type: CustomerType
-    region: Region
+    region: str = Field(..., min_length=1, max_length=160)
     date_range: DateRangeModel
-    category: str = Field(..., min_length=1, max_length=120)
-    item: str = Field(..., min_length=1, max_length=120)
+    category: str = Field(..., min_length=1, max_length=800)
+    item: str = Field(..., min_length=1, max_length=4000)
     asp: float = Field(..., gt=0)
     planned_mix_percent: float = Field(..., ge=0, le=100)
     planned_units: int = Field(..., gt=0)
     expected_sell_through_percent: float = Field(..., ge=0, le=100)
+
+    @field_validator("region", mode="before")
+    @classmethod
+    def normalize_region(cls, v: str) -> str:
+        if isinstance(v, str):
+            return v.strip()
+        return v
 
     @field_validator("category", "item", mode="before")
     @classmethod

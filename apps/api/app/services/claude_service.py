@@ -12,6 +12,17 @@ from app.services.prompt_templates import SYSTEM_PROMPT, user_prompt_block
 logger = logging.getLogger(__name__)
 
 
+def _region_hint_score(region: str) -> float:
+    r = region.strip().upper()
+    if any(k in r for k in ("US", "USA", "NAM", "NORTH AMERICA")):
+        return 70.0
+    if any(k in r for k in ("EMEA", "EUROPE", "UNITED KINGDOM")) or ("UK" in r and "/" in region):
+        return 65.0
+    if any(k in r for k in ("APAC", "ASIA", "PACIFIC", "INDIA", "SOUTH ASIA", "SEA", "ASEAN")):
+        return 60.0
+    return 62.0
+
+
 def _heuristic_analysis(inp: CalculationInputBody, signals: list[RawSignal]) -> ClaudeTrendAnalysis:
     avg_rel = (
         sum(s.relevance_score or 0 for s in signals) / len(signals) if signals else 45.0
@@ -20,7 +31,7 @@ def _heuristic_analysis(inp: CalculationInputBody, signals: list[RawSignal]) -> 
     ct = inp.customer_type.value
     viability = avg_rel + (8 if ct in ("mass", "all") else 0)
     trend_strength = min(100.0, avg_rel + 5)
-    regional = {"US": 70, "EMEA": 65, "APAC": 60}[inp.region.value]
+    regional = _region_hint_score(inp.region)
     seasonal = min(92.0, 55 + viability * 0.25)
 
     saturation = max(25.0, 85 - viability * 0.45 + (30 if inp.planned_mix_percent > 22 else 0))
