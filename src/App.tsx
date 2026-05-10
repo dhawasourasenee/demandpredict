@@ -3,6 +3,7 @@ import { LandingUpload } from "./components/LandingUpload";
 import { BusinessContextForm } from "./components/BusinessContextForm";
 import { ProcessingView } from "./components/ProcessingView";
 import { Article } from "@phosphor-icons/react";
+import { DotFieldBackdrop } from "./components/DotFieldBackdrop";
 import { analyzeGarmentOpportunity, fileToBase64 } from "./lib/analyzeApi";
 import type { BusinessContext, OpportunityReport } from "./lib/types";
 
@@ -60,6 +61,8 @@ export default function App() {
 
   return (
     <div className="app-shell">
+      <DotFieldBackdrop />
+      <div className="app-content">
       <header className="app-header">
         <div className="app-header-inner">
           <Article className="header-ph-icon" size={40} weight="thin" aria-hidden />
@@ -115,6 +118,7 @@ export default function App() {
           </Suspense>
         ) : null}
       </main>
+      </div>
     </div>
   );
 }
