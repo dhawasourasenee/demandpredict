@@ -31,8 +31,11 @@ def _overall_confidence(inp: CalculationInputBody, ai: ClaudeTrendAnalysis) -> f
     ]
     weighted = sum(base_components) / max(1, len(base_components))
 
-    if inp.customer_type.value == "mass":
+    ct = inp.customer_type.value
+    if ct == "mass":
         weighted = weighted * 0.55 + ai.commercial_viability * 0.45
+    elif ct == "all":
+        weighted = weighted * 0.58 + ai.commercial_viability * 0.41
     else:
         weighted = weighted * 0.62 + ai.customer_fit * 0.38
 

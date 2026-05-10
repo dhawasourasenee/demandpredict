@@ -13,3 +13,4 @@ venv/
 apps/api/*.db
 apps/web/.vite/
 coverage/
+*.tsbuildinfo

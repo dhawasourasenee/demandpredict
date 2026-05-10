@@ -26,6 +26,15 @@ def build_final_report_payload(
     return {
         "calculation_summary": {
             "title": label,
+            "calculation_mode": inp.calculation_type.value,
+            "headline": {
+                "item": inp.item.title(),
+                "category": inp.category.title(),
+                "market": inp.market.value.title(),
+                "region": inp.region.value,
+                "start": inp.date_range.start,
+                "end": inp.date_range.end,
+            },
             "planned_mix_percent": inp.planned_mix_percent,
             "recommended_mix_percent": scores.recommended_mix_percent,
             "difference_pp": round(

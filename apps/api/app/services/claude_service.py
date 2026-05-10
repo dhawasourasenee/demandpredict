@@ -17,7 +17,8 @@ def _heuristic_analysis(inp: CalculationInputBody, signals: list[RawSignal]) -> 
         sum(s.relevance_score or 0 for s in signals) / len(signals) if signals else 45.0
     )
 
-    viability = avg_rel + (8 if inp.customer_type.value == "mass" else 0)
+    ct = inp.customer_type.value
+    viability = avg_rel + (8 if ct in ("mass", "all") else 0)
     trend_strength = min(100.0, avg_rel + 5)
     regional = {"US": 70, "EMEA": 65, "APAC": 60}[inp.region.value]
     seasonal = min(92.0, 55 + viability * 0.25)
@@ -63,7 +64,15 @@ def _heuristic_analysis(inp: CalculationInputBody, signals: list[RawSignal]) -> 
         commercial_viability=min(100.0, viability),
         regional_relevance=float(regional),
         seasonal_relevance=seasonal,
-        customer_fit=62.0 if inp.customer_type.value == "early" else 70.0 if inp.customer_type.value == "mass" else 60.0,
+        customer_fit=(
+            62.0
+            if ct == "early"
+            else 70.0
+            if ct == "mass"
+            else 66.0
+            if ct == "all"
+            else 60.0
+        ),
         saturation_risk=min(100.0, saturation),
         momentum=momentum,
         recommended_mix_percent=recommended,

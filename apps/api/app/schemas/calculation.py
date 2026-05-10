@@ -24,6 +24,7 @@ class CustomerType(str, Enum):
     early = "early"
     mass = "mass"
     late = "late"
+    all = "all"
 
 
 class Region(str, Enum):
