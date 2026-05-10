@@ -16,7 +16,7 @@ import { useNavigate } from "react-router-dom";
 import { CalcIconCircle, InfoTip, PageFrame } from "@/components/layout/PageFrame";
 import { createCalculation } from "@/lib/api";
 
-/** Must use forwardRef so `react-hook-form`'s `register()` ref reaches the real &lt;input&gt; (refs are dropped on plain function components). */
+/** forwardRef: `register()`'s ref must reach the native input; plain function components drop that ref in React 18. */
 const FloatingInput = forwardRef<
   HTMLInputElement,
   Omit<InputHTMLAttributes<HTMLInputElement>, "prefix"> & {

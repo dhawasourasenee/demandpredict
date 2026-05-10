@@ -1,6 +1,4 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { runCalculation } from "@foc/server";
-import { calculationInputSchema } from "@foc/shared";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {
@@ -8,6 +6,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
+    const [{ runCalculation }, { calculationInputSchema }] = await Promise.all([
+      import("@foc/server"),
+      import("@foc/shared"),
+    ]);
     const parsed = calculationInputSchema.safeParse(req.body);
     if (!parsed.success) {
       return res.status(422).json({

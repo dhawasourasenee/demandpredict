@@ -1,10 +1,11 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getReport } from "@foc/server";
 
-export default function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "GET") {
     return res.status(405).json({ detail: "Method not allowed" });
   }
+
+  const { getReport } = await import("@foc/server");
 
   const reportId =
     typeof req.query.reportId === "string"

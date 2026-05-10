@@ -1,12 +1,13 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { attachReportToSpace, getSpace } from "@foc/server";
 
 type AttachBody = { report_id?: string };
 
-export default function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({ detail: "Method not allowed" });
   }
+
+  const { attachReportToSpace, getSpace } = await import("@foc/server");
 
   const spaceId =
     typeof req.query.spaceId === "string"
