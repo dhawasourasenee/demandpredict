@@ -7,6 +7,7 @@ import httpx
 
 from api.parse_json_util import extract_json_object
 from api.schemas import BusinessContext
+from api.season_timeline import season_momentum_window
 from api.system_prompt import FASHION_OPPORTUNITY_SYSTEM_PROMPT
 
 OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses"
@@ -61,8 +62,14 @@ async def call_openai_vision(
     # (see https://platform.openai.com/docs/guides/tools-web-search ).
     model = (os.environ.get("OPENAI_MODEL") or "gpt-4.1").strip() or "gpt-4.1"
 
+    win = season_momentum_window(ctx.season)
+    timeline_lines = "\n".join(f"  {i + 1}. {d}" for i, d in enumerate(win.dates))
+
     user_text = (
         f"Business context (JSON):\n{ctx.model_dump_json(indent=2)}\n\n"
+        f"Momentum chart checkpoints for this season code (momentum_monthly_index[0]..[6] MUST "
+        f"follow this order — each is a relative index for that date):\n{timeline_lines}\n"
+        f"Season window label: {win.range_label}\n\n"
         "You MUST use the web_search tool first (one or more queries) to gather current "
         "fashion/editorial/retail signals for this garment type and the business context "
         "(season, market, region, customer, ASP tier).\n"

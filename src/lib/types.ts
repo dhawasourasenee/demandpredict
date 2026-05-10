@@ -86,17 +86,36 @@ export type FinancialSummary = {
   currency_symbol: string;
   average_selling_price: number;
   average_selling_price_caption: string;
+  average_selling_price_reasoning?: string;
   planned_units: number;
   planned_units_caption: string;
+  planned_units_reasoning?: string;
   planned_mix_percent: number;
   planned_mix_caption: string;
+  planned_mix_reasoning?: string;
   recommended_mix_percent: number;
   recommended_mix_caption: string;
+  recommended_mix_reasoning?: string;
   opportunity_gap_percent: number;
   opportunity_gap_caption: string;
+  opportunity_gap_reasoning?: string;
   incremental_revenue: number;
   incremental_revenue_compact: string;
   incremental_revenue_caption: string;
+  incremental_revenue_reasoning?: string;
+};
+
+export type SellThroughAnalysis = {
+  buyer_assumption_percent: number;
+  ai_expected_sell_through_percent: number;
+  final_sell_through_percent: number;
+  summary: string;
+  reasoning: string;
+  upside_drivers: string[];
+  risk_factors: string[];
+  incremental_revenue_at_ai_st?: number;
+  incremental_revenue_at_ai_st_compact?: string;
+  planner_incremental_revenue?: number;
 };
 
 export type TrendScoreBar = {
@@ -141,4 +160,5 @@ export type OpportunityReport = {
   trend_score_bars?: TrendScoreBar[];
   assortment_dashboard?: AssortmentDashboard;
   momentum_trendline?: MomentumTrendline;
+  sell_through_analysis?: SellThroughAnalysis;
 };

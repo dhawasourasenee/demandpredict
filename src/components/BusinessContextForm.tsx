@@ -106,6 +106,7 @@ export function BusinessContextForm({
               className="input"
               value={ctx.season}
               onChange={(e) => setCtx({ ...ctx, season: e.target.value })}
+              placeholder="e.g. SS26, FA26, AW26"
               required
             />
           </div>

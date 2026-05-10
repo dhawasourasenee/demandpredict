@@ -139,6 +139,21 @@ You must output ONLY structured JSON matching this exact shape (all keys require
     "avoid": [],
     "commercial_outlook": ""
   },
+  "sell_through_analysis": {
+    "ai_expected_sell_through_percent": 0,
+    "summary": "",
+    "reasoning": "",
+    "upside_drivers": [],
+    "risk_factors": []
+  },
+  "financial_reasoning": {
+    "average_selling_price": "",
+    "planned_units": "",
+    "planned_mix_percent": "",
+    "recommended_mix_percent": "",
+    "opportunity_gap_percent": "",
+    "incremental_revenue": ""
+  },
   "report_metadata": {
     "sources_overview": "",
     "retail_signals": "",
@@ -154,8 +169,15 @@ Field guidance:
 - report_metadata.sources_overview: One line listing type of sources used (e.g. "Web: fashion trade + mass retail listings").
 - report_metadata.retail_signals: One line naming retailer types or regions tracked (aligned to web search when present).
 - report_metadata.confidence_note: One line, e.g. "Confidence: High — multiple corroborating web sources." or "Confidence: Moderate — limited search results."
+- sell_through_analysis: ai_expected_sell_through_percent is your research-based forecast (0–100) for THIS sku/style vs the buyer's planned assumption in Business context. summary = one tight sentence; reasoning = 2–4 sentences on category velocity, pricing, seasonality, and risk; upside_drivers and risk_factors = short bullet strings (2–5 items each when possible).
+- financial_reasoning: For each key, one or two sentences explaining how you interpret that lever for this garment (the server will still recalculate gap/revenue numbers from the buyer's plan — your text should explain the logic, not restate raw math only).
 
 Scoring guidance for trend_analysis (0–100 integers): higher is better except saturation_risk where higher means more saturated / riskier.
+
+Decisive scoring (avoid "everything is 55–65"):
+- Do not let more than three of the six drivers (trend_strength, commercial_viability, momentum_score, customer_fit, regional_relevance, seasonal_relevance) land in the narrow band 56–64 unless evidence is genuinely flat — if flat, confidence_score must be ≤50 and status must say "uncertain / wait".
+- When evidence clearly supports a buy or a pass, push scores apart: strong cases should show at least two drivers ≥72 OR at least two drivers ≤42 (not clustered).
+- confidence_score must be independent: use the full 30–92 range when justified; never set it within ±4 of the simple average of the six drivers.
 
 Calibration — read the Business context JSON on every run (region, season, target_customer, ASP, planned_mix_percent, planned_units, sell_through). Tie numbers to the actual garment in the image, not generic category priors.
 
@@ -170,7 +192,7 @@ Calibration — read the Business context JSON on every run (region, season, tar
 
 opportunity_analysis.status (Trend status hero line): One short sentence that matches the numeric story — if opportunity is weak, say so plainly (e.g. timing, saturation, or customer mismatch); do not sound bullish when scores are mediocre.
 
-Momentum chart (Jan–Mar 2026 UI): the app plots a "relative momentum index" for THIS garment across seven checkpoints (Jan 1, Jan 15, Feb 1, Feb 15, Mar 1, Mar 15, Mar 31). Populate momentum_monthly_index with exactly seven integers in that order, each between 40 and 100 (inclusive). This is your forecast of how commercial/trend momentum for the pictured style evolves through the season window — not generic category noise. Reflect: (1) how close the season peak is, (2) regional/market fit, (3) saturation or novelty, (4) web_search signals (stronger signals → firmer ramp or plateau). The path may plateau, dip, or accelerate; avoid a generic smooth curve unless evidence supports it. The last value (Mar 31) should match momentum_score (the server pins the chart endpoint to momentum_score if they differ slightly).
+Momentum chart: the user message lists seven ISO dates for THIS buyer season code (e.g. fall vs spring). momentum_monthly_index must have exactly seven integers 40–100 in THAT order — one relative index per listed date. Forecast how commercial/trend momentum for the pictured style evolves across that window (not generic category noise). Reflect season peak timing, regional fit, saturation, and web_search. The path may plateau, dip, or accelerate. The 7th value should align with momentum_score (the server pins the chart's last point to momentum_score if they differ slightly).
 
 For opportunity_analysis numeric fields: provide your best estimates; the server will recompute commercial KPIs (gap %, incremental sales, recommended units) deterministically from the buyer context and your recommended_mix_percent — still output coherent recommended_mix_percent and narrative fields.
 

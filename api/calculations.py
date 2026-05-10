@@ -4,6 +4,7 @@ import math
 from typing import Any
 
 from api.schemas import BusinessContext
+from api.season_timeline import season_momentum_window
 
 
 def _currency_symbol(region: str) -> str:
@@ -57,16 +58,9 @@ def _clamp_momentum_chart_value(value: Any) -> int:
     return _clamp_int(value, 40, 100)
 
 
-def _build_momentum_trendline(trend: dict[str, Any], category: str, season: str) -> dict[str, Any]:
-    dates = [
-        "2026-01-01",
-        "2026-01-15",
-        "2026-02-01",
-        "2026-02-15",
-        "2026-03-01",
-        "2026-03-15",
-        "2026-03-31",
-    ]
+def _build_momentum_trendline(trend: dict[str, Any], category: str, ctx: BusinessContext) -> dict[str, Any]:
+    win = season_momentum_window(ctx.season)
+    dates = list(win.dates)
     end = _clamp_momentum_chart_value(trend.get("momentum_score", 0))
     raw_series = trend.get("momentum_monthly_index")
     n = len(dates)
@@ -87,9 +81,10 @@ def _build_momentum_trendline(trend: dict[str, Any], category: str, season: str)
             v = start + (end - start) * eased
             points.append({"date": dates[i], "index_value": round(v)})
     cat = (category or "Category").strip().upper()
+    season = (ctx.season or "").strip()
     return {
         "title": f"Momentum trendline — {cat}",
-        "subtitle": f"Relative index · {season} · Jan–Mar 2026",
+        "subtitle": f"Relative index · {season} · {win.range_label}",
         "points": points,
     }
 
@@ -121,23 +116,36 @@ def _build_dashboard(
 
     st_pct = float(ctx.expected_sell_through_percent)
 
+    fr = report.get("financial_reasoning")
+    frd: dict[str, Any] = fr if isinstance(fr, dict) else {}
+
+    def _reason(key: str) -> str:
+        v = frd.get(key)
+        return str(v).strip() if v is not None else ""
+
     report["financial_summary"] = {
         "currency_symbol": sym,
         "average_selling_price": round(asp, 2),
         "average_selling_price_caption": "Per unit",
+        "average_selling_price_reasoning": _reason("average_selling_price"),
         "planned_units": planned_u,
         "planned_units_caption": f"{ctx.season} forecast",
+        "planned_units_reasoning": _reason("planned_units"),
         "planned_mix_percent": round(planned_mix, 1),
         "planned_mix_caption": mix_ctx,
+        "planned_mix_reasoning": _reason("planned_mix_percent"),
         "recommended_mix_percent": round(rec_mix_raw, 1),
         "recommended_mix_caption": "AI-adjusted target",
+        "recommended_mix_reasoning": _reason("recommended_mix_percent"),
         "opportunity_gap_percent": round(mix_delta, 1),
         "opportunity_gap_caption": "Under-indexed"
         if mix_delta > 0
         else ("Over-indexed" if mix_delta < 0 else "In line"),
+        "opportunity_gap_reasoning": _reason("opportunity_gap_percent"),
         "incremental_revenue": inc,
         "incremental_revenue_compact": _format_compact_currency(float(inc), sym),
-        "incremental_revenue_caption": f"At {st_pct:.0f}% sell-through",
+        "incremental_revenue_caption": f"At planner {st_pct:.0f}% sell-through",
+        "incremental_revenue_reasoning": _reason("incremental_revenue"),
     }
 
     report["trend_score_bars"] = _build_trend_score_bars(t, ctx)
@@ -157,7 +165,7 @@ def _build_dashboard(
         ),
     }
 
-    report["momentum_trendline"] = _build_momentum_trendline(t, category, ctx.season)
+    report["momentum_trendline"] = _build_momentum_trendline(t, category, ctx)
 
 
 def _clamp_int(value: Any, lo: int = 0, hi: int = 100) -> int:
@@ -225,11 +233,58 @@ def apply_final_calculations(report: dict[str, Any], ctx: BusinessContext) -> di
     if not math.isfinite(o["incremental_sales_opportunity"]):
         o["incremental_sales_opportunity"] = 0
 
+    _merge_sell_through_analysis(
+        report,
+        ctx,
+        incremental_units,
+        asp,
+        int(o["incremental_sales_opportunity"]),
+    )
+
     _build_dashboard(report, ctx, t, o, planned_mix, rec_mix_raw, mix_delta, planned_u, asp)
+
+    report.pop("financial_reasoning", None)
 
     _normalize_extended_fields(report, o)
 
     return report
+
+
+def _merge_sell_through_analysis(
+    report: dict[str, Any],
+    ctx: BusinessContext,
+    incremental_units: float,
+    asp: float,
+    incremental_sales_planner_st: int,
+) -> None:
+    """Fills sell_through_analysis with planner vs AI ST and incremental at AI ST."""
+    raw = report.get("sell_through_analysis")
+    st: dict[str, Any] = raw if isinstance(raw, dict) else {}
+    report["sell_through_analysis"] = st
+
+    buyer = _clamp_float(ctx.expected_sell_through_percent, 0.0, 100.0)
+    st["buyer_assumption_percent"] = round(buyer, 1)
+
+    try:
+        ai = float(st.get("ai_expected_sell_through_percent", buyer))
+    except (TypeError, ValueError):
+        ai = buyer
+    ai = max(0.0, min(100.0, ai))
+    st["ai_expected_sell_through_percent"] = round(ai, 1)
+    st["final_sell_through_percent"] = st["ai_expected_sell_through_percent"]
+
+    st.setdefault("summary", str(st.get("summary") or "").strip())
+    st.setdefault("reasoning", str(st.get("reasoning") or "").strip())
+    ud = st.get("upside_drivers")
+    st["upside_drivers"] = ud if isinstance(ud, list) else []
+    rf = st.get("risk_factors")
+    st["risk_factors"] = rf if isinstance(rf, list) else []
+
+    sym = _currency_symbol(ctx.region)
+    inc_ai = incremental_units * asp * (ai / 100.0)
+    st["incremental_revenue_at_ai_st"] = int(round(inc_ai))
+    st["incremental_revenue_at_ai_st_compact"] = _format_compact_currency(float(inc_ai), sym)
+    st["planner_incremental_revenue"] = incremental_sales_planner_st
 
 
 def _normalize_extended_fields(report: dict[str, Any], o: dict[str, Any]) -> None:
@@ -266,3 +321,17 @@ def _normalize_extended_fields(report: dict[str, Any], o: dict[str, Any]) -> Non
         md.setdefault("sources_overview", "")
         md.setdefault("retail_signals", "")
         md.setdefault("confidence_note", "")
+
+    st = report.get("sell_through_analysis")
+    if isinstance(st, dict):
+        st.setdefault("summary", "")
+        st.setdefault("reasoning", "")
+        st.setdefault("buyer_assumption_percent", 0.0)
+        st.setdefault("ai_expected_sell_through_percent", 0.0)
+        st.setdefault("final_sell_through_percent", 0.0)
+        for key in ("upside_drivers", "risk_factors"):
+            xs = st.get(key)
+            if isinstance(xs, list):
+                st[key] = [str(x).strip() for x in xs if str(x).strip()]
+            else:
+                st[key] = []

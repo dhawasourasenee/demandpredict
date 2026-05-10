@@ -49,7 +49,16 @@ export function opportunityComposite(report: {
   const base = vals.reduce((a, b) => a + b, 0) / vals.length;
   const sat = Math.max(0, Math.min(100, Number(t.saturation_risk) || 0));
   // Higher saturation = more crowded category → compress opportunity (up to ~half weight at sat=100)
-  const saturationFactor = 1 - 0.48 * (sat / 100);
-  const score = base * saturationFactor;
-  return Math.max(0, Math.min(100, Math.round(score)));
+  const saturationFactor = 1 - 0.52 * (sat / 100);
+  const blended = base * saturationFactor;
+  // Slight stretch from midpoint so scores read more decisive when drivers disagree with saturation
+  const decisive = 50 + (blended - 50) * 1.18;
+  return Math.max(0, Math.min(100, Math.round(decisive)));
+}
+
+/** Hero confidence: mild spread from 50 so mid-range reads less "default". */
+export function heroConfidenceScore(raw: number | undefined): number {
+  if (raw == null || Number.isNaN(raw)) return 0;
+  const x = Math.max(0, Math.min(100, raw));
+  return Math.round(50 + (x - 50) * 1.12);
 }

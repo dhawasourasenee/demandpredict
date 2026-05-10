@@ -1,5 +1,10 @@
 import type { BusinessContext, OpportunityReport as Report } from "../lib/types";
-import { currencySymbol, formatMoney, opportunityComposite } from "../lib/format";
+import {
+  currencySymbol,
+  formatMoney,
+  heroConfidenceScore,
+  opportunityComposite,
+} from "../lib/format";
 import { MomentumChart } from "./MomentumChart";
 
 type Props = {
@@ -51,6 +56,7 @@ export function OpportunityReportView({
   const bars = report.trend_score_bars;
   const asst = report.assortment_dashboard;
   const trendline = report.momentum_trendline;
+  const sellThrough = report.sell_through_analysis;
 
   const marketPoss =
     context.market.length > 0
@@ -71,36 +77,42 @@ export function OpportunityReportView({
           label: "Avg selling price",
           value: `${fin.currency_symbol}${fin.average_selling_price.toLocaleString()}`,
           note: fin.average_selling_price_caption,
+          reasoning: fin.average_selling_price_reasoning,
           highlight: false,
         },
         {
           label: "Planned units",
           value: String(fin.planned_units),
           note: fin.planned_units_caption,
+          reasoning: fin.planned_units_reasoning,
           highlight: false,
         },
         {
           label: "Planned mix",
           value: `${fin.planned_mix_percent}%`,
           note: fin.planned_mix_caption,
+          reasoning: fin.planned_mix_reasoning,
           highlight: false,
         },
         {
           label: "Recommended mix",
           value: `${fin.recommended_mix_percent}%`,
           note: fin.recommended_mix_caption,
+          reasoning: fin.recommended_mix_reasoning,
           highlight: true,
         },
         {
           label: "Opportunity gap",
           value: `${fin.opportunity_gap_percent > 0 ? "+" : ""}${fin.opportunity_gap_percent}%`,
           note: fin.opportunity_gap_caption,
+          reasoning: fin.opportunity_gap_reasoning,
           highlight: true,
         },
         {
           label: "Incremental revenue",
           value: fin.incremental_revenue_compact,
           note: fin.incremental_revenue_caption,
+          reasoning: fin.incremental_revenue_reasoning,
           highlight: true,
         },
       ]
@@ -190,7 +202,7 @@ export function OpportunityReportView({
               </div>
               <div className="stat-block">
                 <div className="stat-label">Confidence</div>
-                <div className="stat-value">{t.confidence_score ?? "—"}</div>
+                <div className="stat-value">{heroConfidenceScore(t.confidence_score)}</div>
               </div>
               <div className="stat-block">
                 <div className="stat-label">Opportunity score</div>
@@ -212,10 +224,80 @@ export function OpportunityReportView({
               <span className="label">{c.label}</span>
               <p className="fin-card-value">{c.value}</p>
               <p className="fin-card-note">{c.note}</p>
+              {"reasoning" in c && c.reasoning ? (
+                <p className="fin-card-reasoning">{c.reasoning}</p>
+              ) : null}
             </div>
           ))}
         </div>
       </section>
+
+      {sellThrough ? (
+        <section className="section section-tight">
+          <h2 className="section-title">Sell-through analysis</h2>
+          <p className="section-kicker">
+            Planner assumption vs AI research-based expectation for this SKU. Incremental revenue in the
+            grid above uses your planner sell-through; figures below show the same opportunity at the
+            AI-expected rate.
+          </p>
+          <div className="sell-through-panel">
+            <div className="st-metrics">
+              <div className="st-metric">
+                <span className="label">Planner sell-through</span>
+                <p className="st-metric-value">{sellThrough.buyer_assumption_percent}%</p>
+              </div>
+              <div className="st-metric">
+                <span className="label">AI-expected sell-through</span>
+                <p className="st-metric-value st-metric-highlight">
+                  {sellThrough.final_sell_through_percent}%
+                </p>
+              </div>
+              <div className="st-metric">
+                <span className="label">Incremental @ planner ST</span>
+                <p className="st-metric-value">
+                  {sym}
+                  {(sellThrough.planner_incremental_revenue ?? 0).toLocaleString()}
+                </p>
+              </div>
+              <div className="st-metric">
+                <span className="label">Incremental @ AI ST</span>
+                <p className="st-metric-value">
+                  {sellThrough.incremental_revenue_at_ai_st_compact ??
+                    `${sym}${(sellThrough.incremental_revenue_at_ai_st ?? 0).toLocaleString()}`}
+                </p>
+              </div>
+            </div>
+            {sellThrough.summary ? <p className="st-summary">{sellThrough.summary}</p> : null}
+            {sellThrough.reasoning ? (
+              <div className="st-reasoning prose">
+                {sellThrough.reasoning.split(/\n+/).map((para) => (
+                  <p key={para.slice(0, 48)}>{para}</p>
+                ))}
+              </div>
+            ) : null}
+            {sellThrough.upside_drivers?.length ? (
+              <div className="st-list-block">
+                <div className="label">Upside drivers</div>
+                <ul className="list-clean">
+                  {sellThrough.upside_drivers.map((x) => (
+                    <li key={x}>{x}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+            {sellThrough.risk_factors?.length ? (
+              <div className="st-list-block">
+                <div className="label">Sell-through risks</div>
+                <ul className="list-clean">
+                  {sellThrough.risk_factors.map((x) => (
+                    <li key={x}>{x}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
 
       <section className="section">
         <h2 className="section-title">Trend scores</h2>

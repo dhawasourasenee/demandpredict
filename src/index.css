@@ -519,6 +519,69 @@ button {
   margin: 0.4rem 0 0;
 }
 
+.fin-card-reasoning {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  margin: 0.55rem 0 0;
+  line-height: 1.45;
+  border-top: 1px solid rgba(232, 228, 218, 0.06);
+  padding-top: 0.5rem;
+}
+
+.sell-through-panel {
+  max-width: 720px;
+  padding: 1.15rem 1.25rem;
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+}
+
+.st-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .st-metrics {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.st-metric .label {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.st-metric-value {
+  font-family: var(--serif);
+  font-size: 1.2rem;
+  margin: 0;
+  color: var(--text);
+}
+
+.st-metric-highlight {
+  color: var(--positive);
+}
+
+.st-summary {
+  margin: 1rem 0 0;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.st-reasoning {
+  margin-top: 0.75rem;
+}
+
+.st-list-block {
+  margin-top: 1rem;
+}
+
+.st-list-block .label {
+  margin-bottom: 0.35rem;
+}
+
 .trend-bars {
   display: flex;
   flex-direction: column;
