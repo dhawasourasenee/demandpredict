@@ -162,4 +162,6 @@ Dashboard copy (required strings):
 - adoption_stage: One concise line on adoption phase — buyer-facing.
 - mix_assortment_context: Short label for planned mix footnote — tie to garment_analysis.category.
 
-Do NOT output financial_summary, trend_score_bars, assortment_dashboard, or momentum_trendline — the server builds those for the UI."""
+Do NOT output financial_summary, trend_score_bars, assortment_dashboard, or momentum_trendline — the server builds those for the UI.
+
+When using web_search: your final reply must still be one raw JSON object only (no ``` fences, no commentary before or after) — the API cannot use JSON mode alongside the search tool, so strict formatting is required."""

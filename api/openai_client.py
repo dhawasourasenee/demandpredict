@@ -91,7 +91,9 @@ async def call_openai_vision(
         "tools": [_web_search_tool(ctx)],
         "tool_choice": "required",
         "include": ["web_search_call.action.sources"],
-        "text": {"format": {"type": "json_object"}},
+        # OpenAI does not allow json_object / structured JSON mode together with web_search.
+        # Plain text + strong prompt; server parses JSON via extract_json_object.
+        "text": {"format": {"type": "text"}},
         "max_output_tokens": 8192,
     }
 
