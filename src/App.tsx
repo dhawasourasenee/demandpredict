@@ -2,7 +2,7 @@ import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { LandingUpload } from "./components/LandingUpload";
 import { BusinessContextForm } from "./components/BusinessContextForm";
 import { ProcessingView } from "./components/ProcessingView";
-import { Article } from "@phosphor-icons/react";
+import { ShirtFolded } from "@phosphor-icons/react";
 import { DotFieldBackdrop } from "./components/DotFieldBackdrop";
 import { analyzeGarmentOpportunity, fileToBase64 } from "./lib/analyzeApi";
 import type { BusinessContext, OpportunityReport } from "./lib/types";
@@ -65,13 +65,18 @@ export default function App() {
       <div className="app-content">
       <header className="app-header">
         <div className="app-header-inner">
-          <Article className="header-ph-icon" size={40} weight="thin" aria-hidden />
+          <ShirtFolded
+            className="header-ph-icon header-ph-icon-shirt"
+            size={52}
+            weight="regular"
+            aria-hidden
+          />
           <div className="app-header-text">
-            <div className="app-header-top">
-              <span className="year-pill">{new Date().getFullYear()}</span>
-            </div>
-            <div className="app-brand">fashion opportunity intelligence</div>
-            <div className="app-tagline">assortment opportunity engine — editorial briefings</div>
+            <span className="year-pill">{new Date().getFullYear()}</span>
+            <h1 className="app-brand">Fashion opportunity intelligence</h1>
+            <p className="app-tagline">
+              assortment opportunity engine – editorial briefings
+            </p>
           </div>
         </div>
       </header>
