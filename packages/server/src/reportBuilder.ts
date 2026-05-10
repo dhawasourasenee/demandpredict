@@ -46,15 +46,21 @@ export function buildFinalReportPayload(
     calculation_summary: {
       title: label,
       calculation_mode: inp.calculation_type,
+      currency: "INR",
       headline: {
         item: prettyWords(inp.item, 140),
         category: prettyWords(inp.category),
         market: inp.market.charAt(0).toUpperCase() + inp.market.slice(1),
+        department: inp.department.charAt(0).toUpperCase() + inp.department.slice(1),
+        target_customer: inp.customer_type,
         region,
         season: inp.season,
         start: inp.date_range.start,
         end: inp.date_range.end,
       },
+      average_selling_price_inr: inp.asp,
+      planned_units: inp.planned_units,
+      expected_sell_through_percent: inp.expected_sell_through_percent,
       planned_mix_percent: inp.planned_mix_percent,
       recommended_mix_percent: scores.recommended_mix_percent,
       difference_pp: Math.round((scores.recommended_mix_percent - inp.planned_mix_percent) * 100) / 100,
@@ -77,9 +83,10 @@ export function buildFinalReportPayload(
     },
     trendline_data: trendline.map((tp) => ({ ...tp })),
     opportunity_estimation: {
+      currency: "INR",
       incremental_opportunity_estimate: scores.incremental_opportunity_estimate,
       disclaimer:
-        "Approximate INR illustration only—not a revenue guarantee and not sales certainty. " +
+        "All monetary values above are Indian Rupees (INR)—approximate illustration only; not a revenue guarantee or sales certainty. " +
         `Trendline is ${trendEstimatedFlag ? "estimated" : "evidence-guided"} (see point flags).`,
     },
     recommendation: {

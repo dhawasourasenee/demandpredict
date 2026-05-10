@@ -37,7 +37,7 @@ INPUTS YOU WILL RECEIVE:
 - date_range
 - category
 - item
-- average_selling_price
+- average_selling_price (INR per unit)
 - planned_assortment_mix_percent
 - planned_units
 - expected_sell_through_percent
@@ -114,7 +114,7 @@ If near zero, user is aligned.
 incremental_sales_opportunity =
 absolute(opportunity_gap_percent / 100)
 × planned_units
-× average_selling_price
+× average_selling_price (INR)
 × expected_sell_through_percent / 100
 
 RESPONSE FORMAT:

@@ -12,6 +12,11 @@ function fmtInr(n: number) {
   return n.toLocaleString("en-IN", { maximumFractionDigits: 0 });
 }
 
+/** INR amounts (ASP etc.) — allow up to two decimal places when needed */
+function fmtInrRupee(n: number) {
+  return n.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+}
+
 function triggerDownload(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -150,6 +155,10 @@ export default function ReportPage() {
   const diffPp = Math.abs(Number(summary.difference_pp || 0));
   const inc = Number(opp.incremental_opportunity_estimate || 0);
   const incHi = Math.round(inc * 1.052);
+  const aspInr = Number(summary.average_selling_price_inr ?? 0);
+  const plannedUnits = Number(summary.planned_units ?? 0);
+  const sellThrough = Number(summary.expected_sell_through_percent ?? 0);
+  const reportCurrency = String(summary.currency || opp.currency || "INR");
 
   const p1 =
     assortment.status === "under_indexed"
@@ -209,7 +218,24 @@ export default function ReportPage() {
         </div>
 
         <div className="mb-10 flex flex-wrap items-start justify-between gap-4">
-          <h1 className="text-[28px] font-bold leading-snug tracking-tight text-neutral-900">{headlineText}</h1>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-[28px] font-bold leading-snug tracking-tight text-neutral-900">{headlineText}</h1>
+            {headline && (
+              <p className="mt-2 text-[13px] leading-snug text-neutral-600">
+                {[
+                  headline.season,
+                  headline.region,
+                  titleCase(headline.market),
+                  headline.department ? `${headline.category} (${headline.department})` : titleCase(headline.category),
+                  `${formatDmY(headline.start)}–${formatDmY(headline.end)}`,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+                {" · "}All figures in{" "}
+                <span className="font-semibold text-neutral-800">{reportCurrency}</span>
+              </p>
+            )}
+          </div>
           <button type="button" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-neutral-300 bg-white text-neutral-600 hover:bg-neutral-50">
             <span className="sr-only">Edit</span>
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
@@ -218,6 +244,31 @@ export default function ReportPage() {
             </svg>
           </button>
         </div>
+
+        {(aspInr > 0 || plannedUnits > 0 || sellThrough > 0) && (
+          <div className="mb-8 grid gap-6 border-b border-neutral-200 pb-8 sm:grid-cols-3">
+            {aspInr > 0 && (
+              <div>
+                <p className="text-[28px] font-bold leading-none text-neutral-900">₹{fmtInrRupee(aspInr)}</p>
+                <p className="mt-2 text-sm leading-snug text-neutral-700">Avg selling price (INR)</p>
+              </div>
+            )}
+            {plannedUnits > 0 && (
+              <div>
+                <p className="text-[28px] font-bold leading-none text-neutral-900">
+                  {plannedUnits.toLocaleString("en-IN")}
+                </p>
+                <p className="mt-2 text-sm leading-snug text-neutral-700">Planned units</p>
+              </div>
+            )}
+            {sellThrough > 0 && (
+              <div>
+                <p className="text-[28px] font-bold leading-none text-neutral-900">{sellThrough.toFixed(1)}%</p>
+                <p className="mt-2 text-sm leading-snug text-neutral-700">Expected sell-through rate</p>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="mb-8 flex flex-wrap gap-12 border-b border-neutral-200 pb-8">
           <div>
@@ -246,7 +297,12 @@ export default function ReportPage() {
         </div>
 
         <div className="mx-auto mb-14 max-w-2xl rounded-lg bg-white p-8 shadow-card">
-          <p className="mb-4 text-[15px] font-medium text-neutral-900">Incremental sales opportunity (INR)</p>
+          <p className="mb-1 text-[15px] font-medium text-neutral-900">Incremental revenue opportunity ({reportCurrency})</p>
+          {sellThrough > 0 && (
+            <p className="mb-4 text-[12px] text-neutral-500">
+              Estimated at planned units × ASP × {sellThrough.toFixed(1)}% sell-through adjustment (illustrative).
+            </p>
+          )}
           <div className="flex flex-wrap items-baseline gap-2">
             <span className="text-[52px] font-bold leading-none text-accent-green">₹{fmtInr(inc)}</span>
             <span className="text-sm text-accent-green/90">Approx.</span>
