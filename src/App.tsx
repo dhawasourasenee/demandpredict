@@ -4,7 +4,6 @@ import { BusinessContextForm } from "./components/BusinessContextForm";
 import { ProcessingView } from "./components/ProcessingView";
 import { OpportunityReportView } from "./components/OpportunityReport";
 import { Article } from "@phosphor-icons/react";
-import { EditorialDoodleStrip } from "./components/EditorialDecor";
 import { analyzeGarmentOpportunity, fileToBase64 } from "./lib/analyzeApi";
 import type { BusinessContext, OpportunityReport } from "./lib/types";
 
@@ -71,7 +70,6 @@ export default function App() {
       </header>
 
       <main className="app-main">
-        <EditorialDoodleStrip />
         {error ? <div className="error-banner">{error}</div> : null}
 
         {step === "upload" ? (

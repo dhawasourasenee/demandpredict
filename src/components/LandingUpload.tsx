@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import {
   Calculator,
   ChartLineUp,
@@ -6,6 +7,19 @@ import {
 
 type Props = {
   onFile: (file: File) => void;
+};
+
+const tileHover = {
+  whileHover: {
+    y: -5,
+    transition: { type: "spring" as const, stiffness: 420, damping: 22 },
+  },
+};
+
+const tileSpring = {
+  type: "spring" as const,
+  stiffness: 380,
+  damping: 28,
 };
 
 function mosaicDateParts() {
@@ -21,25 +35,18 @@ function mosaicDateParts() {
   return { weekday, day, month, dayOfYear };
 }
 
-function WavyUnderline() {
-  return (
-    <svg
-      className="editorial-wavy-line"
-      viewBox="0 0 120 10"
-      preserveAspectRatio="none"
-      aria-hidden
-    >
-      <path d="M2 6c14-5 22-5 34 0s22 5 34 0 22-5 34 0 14 3 18 0" />
-    </svg>
-  );
-}
-
 export function LandingUpload({ onFile }: Props) {
   const { weekday, day, month, dayOfYear } = mosaicDateParts();
 
   return (
     <div className="landing-mosaic">
-      <section className="mosaic-tile mosaic-tile-hero">
+      <motion.section
+        className="mosaic-tile mosaic-tile-hero"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ ...tileSpring, delay: 0 }}
+        {...tileHover}
+      >
         <p className="landing-kicker">
           <FlowerTulip className="mosaic-icon" size={22} weight="thin" aria-hidden />
           <span>ai-powered · vision + live signals</span>
@@ -47,17 +54,26 @@ export function LandingUpload({ onFile }: Props) {
         <h1 className="landing-title">
           drop a garment still — we’ll chart the full opportunity story.
         </h1>
-        <div className="editorial-underline-wrap">
+        <p className="landing-lede-accent">
           <span className="text-accent-em">commercial clarity</span>
-          <WavyUnderline />
-        </div>
+          <span className="landing-lede-accent-rest">
+            {" "}
+            without the spreadsheet fog.
+          </span>
+        </p>
         <p className="landing-sub">
           buying-room narrative, layered like a mood board — not another sterile
           dashboard.
         </p>
-      </section>
+      </motion.section>
 
-      <section className="mosaic-tile mosaic-tile-tilt">
+      <motion.section
+        className="mosaic-tile mosaic-tile-tilt"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ ...tileSpring, delay: 0.06 }}
+        {...tileHover}
+      >
         <div className="mosaic-tilt-inner">
           <div className="mosaic-drop-card">
             <div className="mosaic-date-row">
@@ -99,9 +115,15 @@ export function LandingUpload({ onFile }: Props) {
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
-      <section className="mosaic-tile mosaic-tile-feature">
+      <motion.section
+        className="mosaic-tile mosaic-tile-feature"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ ...tileSpring, delay: 0.12 }}
+        {...tileHover}
+      >
         <p className="mosaic-feature-eyebrow">search-backed signals</p>
         <h2 className="mosaic-feature-title">live trend tension</h2>
         <p className="mosaic-feature-body">
@@ -109,9 +131,15 @@ export function LandingUpload({ onFile }: Props) {
           evidence-first, never generic.
         </p>
         <ChartLineUp className="mosaic-feature-icon" size={40} weight="thin" aria-hidden />
-      </section>
+      </motion.section>
 
-      <section className="mosaic-tile mosaic-tile-feature">
+      <motion.section
+        className="mosaic-tile mosaic-tile-feature"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ ...tileSpring, delay: 0.18 }}
+        {...tileHover}
+      >
         <p className="mosaic-feature-eyebrow">plan-aware math</p>
         <h2 className="mosaic-feature-title">assortment + revenue gap</h2>
         <p className="mosaic-feature-body">
@@ -119,7 +147,7 @@ export function LandingUpload({ onFile }: Props) {
           season and door count.
         </p>
         <Calculator className="mosaic-feature-icon" size={40} weight="thin" aria-hidden />
-      </section>
+      </motion.section>
     </div>
   );
 }
