@@ -208,4 +208,42 @@ def apply_final_calculations(report: dict[str, Any], ctx: BusinessContext) -> di
 
     _build_dashboard(report, ctx, t, o, planned_mix, rec_mix_raw, mix_delta, planned_u, asp)
 
+    _normalize_extended_fields(report, o)
+
     return report
+
+
+def _normalize_extended_fields(report: dict[str, Any], o: dict[str, Any]) -> None:
+    for ev in report.get("evidence_summary") or []:
+        if isinstance(ev, dict):
+            ev.setdefault("source_channel", "")
+
+    for risk in report.get("risks") or []:
+        if not isinstance(risk, dict):
+            continue
+        sev = str(risk.get("severity", "")).lower()
+        if sev not in ("low", "medium", "high"):
+            risk["severity"] = "medium"
+
+    for rel in report.get("related_opportunities") or []:
+        if not isinstance(rel, dict):
+            continue
+        if not (rel.get("tag") or "").strip():
+            rel["tag"] = str(rel.get("momentum") or "").strip()
+        tv = str(rel.get("tag_variant", "")).lower()
+        if tv not in ("green", "blue", "gold", "neutral"):
+            rel["tag_variant"] = "neutral"
+
+    fr = report.setdefault("final_recommendation", {})
+    if isinstance(fr, dict):
+        fr.setdefault("headline", "")
+        if not (fr.get("headline") or "").strip() and (fr.get("summary") or "").strip():
+            mix = o.get("recommended_mix_percent")
+            if mix is not None:
+                fr["headline"] = f"Recommendation: increase assortment mix toward {mix}%"
+
+    md = report.setdefault("report_metadata", {})
+    if isinstance(md, dict):
+        md.setdefault("sources_overview", "")
+        md.setdefault("retail_signals", "")
+        md.setdefault("confidence_note", "")

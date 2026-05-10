@@ -15,6 +15,26 @@ function gapDescriptor(gap: number): string {
   return "In line";
 }
 
+function riskSeverityClass(s?: string): string {
+  const s0 = (s || "medium").toLowerCase();
+  if (s0 === "high") return "risk-badge risk-badge-high";
+  if (s0 === "low") return "risk-badge risk-badge-low";
+  return "risk-badge risk-badge-medium";
+}
+
+function oppTagClass(v?: string): string {
+  const x = (v || "neutral").toLowerCase();
+  if (x === "green") return "opp-tag opp-tag-green";
+  if (x === "blue") return "opp-tag opp-tag-blue";
+  if (x === "gold") return "opp-tag opp-tag-gold";
+  return "opp-tag opp-tag-neutral";
+}
+
+function capitalizeWord(s: string): string {
+  const x = s.toLowerCase();
+  return x.charAt(0).toUpperCase() + x.slice(1);
+}
+
 export function OpportunityReportView({
   context,
   report,
@@ -363,51 +383,65 @@ export function OpportunityReportView({
       </section>
 
       <section className="section">
-        <h2 className="section-title">Evidence layer</h2>
+        <h2 className="section-title">Evidence summary</h2>
+        <p className="section-kicker">
+          Grounded in live web search when <code className="inline-code">TAVILY_API_KEY</code>{" "}
+          is configured on the server; otherwise desk-estimated signals.
+        </p>
         {report.evidence_summary?.length ? (
-          report.evidence_summary.map((ev) => (
-            <div key={ev.source + ev.summary.slice(0, 24)} className="evidence-card">
-              <div className="evidence-source">{ev.source || "Source"}</div>
-              <p style={{ margin: "0.5rem 0", color: "var(--text)" }}>
-                {ev.summary}
-              </p>
-              <p style={{ margin: 0, fontSize: "0.85rem", color: "var(--text-muted)" }}>
-                <strong style={{ color: "var(--text)" }}>Why it matters:</strong>{" "}
-                {ev.why_it_matters}
-              </p>
-              <p
-                style={{
-                  margin: "0.65rem 0 0",
-                  fontFamily: "var(--mono)",
-                  fontSize: "0.65rem",
-                  color: "var(--accent)",
-                }}
-              >
-                Signal strength: {ev.signal_strength || "—"}
-              </p>
-            </div>
-          ))
+          <div className="evidence-grid">
+            {report.evidence_summary.map((ev) => (
+              <div key={ev.source + ev.summary.slice(0, 24)} className="evidence-row">
+                <div className="evidence-row-source">
+                  <span className="evidence-source-name">{ev.source || "Source"}</span>
+                  {ev.source_channel ? (
+                    <span className="evidence-channel">{ev.source_channel}</span>
+                  ) : null}
+                </div>
+                <div className="evidence-row-body">
+                  <p className="evidence-summary-text">{ev.summary}</p>
+                  {ev.why_it_matters ? (
+                    <p className="evidence-why">
+                      <strong>Why it matters:</strong> {ev.why_it_matters}
+                    </p>
+                  ) : null}
+                  {ev.signal_strength ? (
+                    <p className="evidence-signal">Signal: {ev.signal_strength}</p>
+                  ) : null}
+                </div>
+              </div>
+            ))}
+          </div>
         ) : (
           <p className="prose">No evidence rows returned.</p>
         )}
       </section>
 
       <section className="section">
-        <h2 className="section-title">Risks</h2>
-        <ul className="list-clean">
+        <h2 className="section-title">Risk assessment</h2>
+        <div className="risk-list">
           {report.risks?.length
             ? report.risks.map((r) => (
-                <li key={r.type + r.description.slice(0, 20)}>
-                  <strong>{r.type}:</strong> {r.description}
-                </li>
+                <div key={r.type + r.description.slice(0, 24)} className="risk-item">
+                  <span className={riskSeverityClass(r.severity)}>
+                    {capitalizeWord(r.severity || "medium")}
+                  </span>
+                  <div className="risk-body">
+                    <div className="risk-title">{r.type}</div>
+                    <p className="risk-desc">{r.description}</p>
+                  </div>
+                </div>
               ))
             : "—"}
-        </ul>
+        </div>
       </section>
 
       <section className="section">
         <h2 className="section-title">Recommendation</h2>
-        <div className="rec-box">
+        <div className="rec-box rec-box-featured">
+          {report.final_recommendation.headline ? (
+            <h3 className="rec-headline">{report.final_recommendation.headline}</h3>
+          ) : null}
           <p className="rec-summary">{report.final_recommendation.summary}</p>
           <div className="label">Prioritize</div>
           <ul className="list-clean">
@@ -438,29 +472,48 @@ export function OpportunityReportView({
 
       <section className="section">
         <h2 className="section-title">Related opportunities</h2>
-        <div className="intel-grid">
+        <div className="opp-card-grid">
           {report.related_opportunities?.length
             ? report.related_opportunities.map((rel) => (
-                <div key={rel.category} className="intel-card card-elevated">
-                  <div style={{ fontWeight: 600 }}>{rel.category}</div>
-                  <p style={{ margin: "0.5rem 0 0", fontSize: "0.88rem", color: "var(--text-muted)" }}>
-                    {rel.reason}
-                  </p>
-                  <p
-                    style={{
-                      margin: "0.65rem 0 0",
-                      fontFamily: "var(--mono)",
-                      fontSize: "0.65rem",
-                      color: "var(--accent)",
-                    }}
-                  >
-                    {rel.momentum}
-                  </p>
+                <div key={rel.category} className="opp-card">
+                  <div className="opp-card-title">{rel.category}</div>
+                  <p className="opp-card-reason">{rel.reason}</p>
+                  <div className="opp-card-footer">
+                    <span className={oppTagClass(rel.tag_variant)}>
+                      {rel.tag || rel.momentum || "—"}
+                    </span>
+                  </div>
                 </div>
               ))
             : "—"}
         </div>
       </section>
+
+      {report.report_metadata &&
+      (report.report_metadata.sources_overview ||
+        report.report_metadata.retail_signals ||
+        report.report_metadata.confidence_note) ? (
+        <footer className="report-footer">
+          {report.report_metadata.sources_overview ? (
+            <p>
+              <span className="report-footer-label">Sources</span>{" "}
+              {report.report_metadata.sources_overview}
+            </p>
+          ) : null}
+          {report.report_metadata.retail_signals ? (
+            <p>
+              <span className="report-footer-label">Retail signals</span>{" "}
+              {report.report_metadata.retail_signals}
+            </p>
+          ) : null}
+          {report.report_metadata.confidence_note ? (
+            <p>
+              <span className="report-footer-label">Confidence</span>{" "}
+              {report.report_metadata.confidence_note}
+            </p>
+          ) : null}
+        </footer>
+      ) : null}
     </div>
   );
 }

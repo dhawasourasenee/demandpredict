@@ -7,6 +7,7 @@ import httpx
 
 from api.parse_json_util import extract_json_object
 from api.schemas import BusinessContext
+from api.search_context import fetch_live_search_context
 from api.system_prompt import FASHION_OPPORTUNITY_SYSTEM_PROMPT
 
 OPENAI_URL = "https://api.openai.com/v1/chat/completions"
@@ -23,7 +24,16 @@ async def call_openai_vision(
 
     model = (os.environ.get("OPENAI_MODEL") or "gpt-4o").strip() or "gpt-4o"
 
+    search_blob = await fetch_live_search_context(ctx)
+    search_block = (
+        "### SEARCH CONTEXT (live web — ground evidence here; quote domains/outlets that appear)\n"
+        f"{search_blob}\n###\n\n"
+        if search_blob
+        else "### SEARCH CONTEXT\n(none — no live search configured; keep evidence conservative and flag uncertainty.)\n###\n\n"
+    )
+
     user_text = (
+        f"{search_block}"
         f"Business context (JSON):\n{ctx.model_dump_json(indent=2)}\n\n"
         "Analyze the attached garment image. Return ONLY one JSON object matching the schema "
         "from your instructions. No markdown, no prose outside JSON."
@@ -48,7 +58,7 @@ async def call_openai_vision(
                 ],
             },
         ],
-        "max_tokens": 4096,
+        "max_tokens": 6144,
     }
 
     async with httpx.AsyncClient(timeout=120.0) as client:

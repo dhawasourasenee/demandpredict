@@ -49,24 +49,35 @@ export type EvidenceItem = {
   summary: string;
   why_it_matters: string;
   signal_strength: string;
+  source_channel?: string;
 };
 
 export type RiskItem = {
   type: string;
   description: string;
+  severity?: "low" | "medium" | "high";
 };
 
 export type RelatedOpportunity = {
   category: string;
   reason: string;
   momentum: string;
+  tag?: string;
+  tag_variant?: "green" | "blue" | "gold" | "neutral";
 };
 
 export type FinalRecommendation = {
+  headline?: string;
   summary: string;
   recommended_actions: string[];
   avoid: string[];
   commercial_outlook: string;
+};
+
+export type ReportMetadata = {
+  sources_overview: string;
+  retail_signals: string;
+  confidence_note: string;
 };
 
 export type FinancialSummary = {
@@ -123,6 +134,7 @@ export type OpportunityReport = {
   risks: RiskItem[];
   related_opportunities: RelatedOpportunity[];
   final_recommendation: FinalRecommendation;
+  report_metadata?: ReportMetadata;
   financial_summary?: FinancialSummary;
   trend_score_bars?: TrendScoreBar[];
   assortment_dashboard?: AssortmentDashboard;
