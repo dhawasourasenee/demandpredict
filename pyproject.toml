@@ -2,6 +2,13 @@
 name = "demandpredict"
 version = "0.1.0"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "fastapi==0.115.6",
+    "uvicorn[standard]==0.34.0",
+    "httpx==0.28.1",
+    "pydantic==2.10.3",
+    "python-dotenv==1.0.1",
+]
 
-# Vercel discovers each api/*.py that exports `app` (e.g. api/analyze.py → /api/analyze).
+# Vercel bundles Python deps from this table (and/or requirements.txt). An empty
+# [project.dependencies] previously skipped packages like python-dotenv.

@@ -13,15 +13,14 @@ _repo_root = Path(__file__).resolve().parent.parent
 if str(_repo_root) not in sys.path:
     sys.path.insert(0, str(_repo_root))
 
-from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from api._env import load_local_env
 from api.analysis import run_analysis
 from api.schemas import AnalyzeRequest, AnalyzeResponse
 
-load_dotenv(_repo_root / ".env")
-load_dotenv(_repo_root / ".env.local")
+load_local_env(_repo_root)
 
 _default_origins = [
     "http://localhost:5173",
