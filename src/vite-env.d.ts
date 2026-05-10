@@ -1,8 +1,8 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  readonly VITE_OPENAI_API_KEY?: string;
-  readonly VITE_OPENAI_MODEL?: string;
+  /** Optional API origin (no trailing slash). Empty = same origin + dev proxy. */
+  readonly VITE_API_BASE?: string;
 }
 
 interface ImportMeta {

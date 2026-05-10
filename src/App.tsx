@@ -3,7 +3,7 @@ import { LandingUpload } from "./components/LandingUpload";
 import { BusinessContextForm } from "./components/BusinessContextForm";
 import { ProcessingView } from "./components/ProcessingView";
 import { OpportunityReportView } from "./components/OpportunityReport";
-import { analyzeGarmentOpportunity, fileToBase64 } from "./lib/openai";
+import { analyzeGarmentOpportunity, fileToBase64 } from "./lib/analyzeApi";
 import type { BusinessContext, OpportunityReport } from "./lib/types";
 
 type Step = "upload" | "context" | "processing" | "report";
