@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:api": "cd api && (.venv/bin/python -m uvicorn index:app --reload --host 127.0.0.1 --port 8000 || python3 -m uvicorn index:app --reload --host 127.0.0.1 --port 8000)",
+    "dev:api": "([ -x api/.venv/bin/python ] && api/.venv/bin/python || python3) -m uvicorn api.index:app --reload --host 127.0.0.1 --port 8000",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview"
   },

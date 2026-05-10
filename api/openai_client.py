@@ -5,9 +5,9 @@ import os
 
 import httpx
 
-from parse_json_util import extract_json_object
-from schemas import BusinessContext
-from system_prompt import FASHION_OPPORTUNITY_SYSTEM_PROMPT
+from api.parse_json_util import extract_json_object
+from api.schemas import BusinessContext
+from api.system_prompt import FASHION_OPPORTUNITY_SYSTEM_PROMPT
 
 OPENAI_URL = "https://api.openai.com/v1/chat/completions"
 

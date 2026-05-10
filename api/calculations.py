@@ -3,7 +3,7 @@ from __future__ import annotations
 import math
 from typing import Any
 
-from schemas import BusinessContext
+from api.schemas import BusinessContext
 
 
 def _clamp_int(value: Any, lo: int = 0, hi: int = 100) -> int:

@@ -7,9 +7,9 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from calculations import apply_final_calculations
-from openai_client import call_openai_vision
-from schemas import AnalyzeRequest, AnalyzeResponse
+from api.calculations import apply_final_calculations
+from api.openai_client import call_openai_vision
+from api.schemas import AnalyzeRequest, AnalyzeResponse
 
 _root = Path(__file__).resolve().parent.parent
 load_dotenv(_root / ".env")
