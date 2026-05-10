@@ -4,6 +4,4 @@ version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = []
 
-[tool.vercel]
-# Register FastAPI alongside the Vite static app (see Vercel Python + FastAPI docs).
-entrypoint = "api.index:app"
+# Vercel discovers each api/*.py that exports `app` (e.g. api/analyze.py → /api/analyze).

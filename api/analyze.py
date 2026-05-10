@@ -1,5 +1,5 @@
 """
-Local dev aggregate: uvicorn api.index:app — same routes the browser uses (/api/...).
+Vercel serverless entry: URL /api/analyze → this function receives path / only.
 """
 
 from __future__ import annotations
@@ -28,7 +28,7 @@ _extra = [
     if o.strip()
 ]
 
-app = FastAPI(title="Fashion Opportunity Intelligence API", redirect_slashes=False)
+app = FastAPI(title="Fashion Opportunity Intelligence — analyze", redirect_slashes=False)
 
 app.add_middleware(
     CORSMiddleware,
@@ -39,13 +39,6 @@ app.add_middleware(
 )
 
 
-@app.get("/api/health")
-@app.get("/health")
-async def health() -> dict[str, str]:
-    return {"status": "ok"}
-
-
-@app.post("/api/analyze", response_model=AnalyzeResponse)
-@app.post("/analyze", response_model=AnalyzeResponse)
+@app.post("/", response_model=AnalyzeResponse)
 async def analyze(req: AnalyzeRequest) -> AnalyzeResponse:
     return await run_analysis(req)
