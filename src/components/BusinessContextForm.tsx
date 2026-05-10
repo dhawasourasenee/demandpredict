@@ -27,19 +27,10 @@ export function BusinessContextForm({
 
   return (
     <div className="card" style={{ maxWidth: 720, margin: "0 auto" }}>
-      <div style={{ padding: "2rem" }}>
-        <h2
-          style={{
-            fontFamily: "var(--serif)",
-            fontSize: "1.5rem",
-            fontWeight: 400,
-            margin: "0 0 0.25rem",
-          }}
-        >
-          Business context
-        </h2>
-        <p style={{ color: "var(--text-muted)", margin: "0 0 1.5rem", fontSize: "0.9rem" }}>
-          Assortment inputs only. Category and attributes are inferred from the image.
+      <div className="page-card-inner">
+        <h2 className="form-page-title">business context</h2>
+        <p className="form-page-lede">
+          assortment inputs only — category and attributes are inferred from the image.
         </p>
 
         {imagePreviewUrl ? (
@@ -200,10 +191,10 @@ export function BusinessContextForm({
             }}
           >
             <button type="button" className="btn btn-ghost" onClick={onBack}>
-              Back
+              back
             </button>
             <button type="submit" className="btn">
-              Run intelligence
+              run intelligence
             </button>
           </div>
         </form>

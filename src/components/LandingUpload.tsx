@@ -4,15 +4,15 @@ type Props = {
 
 export function LandingUpload({ onFile }: Props) {
   return (
-    <div className="card" style={{ maxWidth: 640, margin: "0 auto" }}>
-      <div style={{ padding: "2.5rem 2rem" }}>
-        <p
-          className="app-tagline"
-          style={{ textAlign: "center", marginBottom: "1.25rem" }}
-        >
-          AI-powered fashion assortment opportunity engine
-        </p>
-        <label className="upload-zone" style={{ display: "block", position: "relative" }}>
+    <div className="card landing-card-constrain">
+      <div className="page-card-inner">
+        <p className="landing-kicker">ai-powered · vision + live signals</p>
+        <h1 className="landing-title">
+          drop a garment still — we’ll chart the{" "}
+          <span className="text-accent-em">commercial story</span>
+        </h1>
+        <p className="landing-sub">buying-room narrative, not another sterile dashboard.</p>
+        <label className="upload-zone upload-zone-wrap">
           <input
             type="file"
             accept="image/*"
@@ -23,15 +23,12 @@ export function LandingUpload({ onFile }: Props) {
             }}
           />
           <div>
-            <div style={{ fontFamily: "var(--serif)", fontSize: "1.35rem" }}>
-              Upload a garment image
-            </div>
-            <div style={{ color: "var(--text-muted)", marginTop: "0.5rem" }}>
-              to evaluate market opportunity
+            <div className="landing-upload-callout">upload a garment image</div>
+            <div className="landing-upload-meta">
+              sketches, product, runway, cad, mannequin — all welcome
             </div>
             <div className="upload-hint">
-              Supported: sketches · product images · runway references · CAD renders ·
-              mannequin shots
+              we read silhouette, wash, archetype, and trend tension against your plan.
             </div>
           </div>
         </label>

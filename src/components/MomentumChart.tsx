@@ -15,6 +15,8 @@ function shortLabel(iso: string): string {
 export function MomentumChart({ title, subtitle, points }: Props) {
   if (!points.length) return null;
 
+  const gradId = `momentumArea-${points[0]?.date ?? "chart"}-${points.length}`;
+
   const w = 640;
   const h = 200;
   const padL = 44;
@@ -54,9 +56,9 @@ export function MomentumChart({ title, subtitle, points }: Props) {
         aria-label={title}
       >
         <defs>
-          <linearGradient id="momentumArea" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="rgba(125, 205, 163, 0.35)" />
-            <stop offset="100%" stopColor="rgba(125, 205, 163, 0.02)" />
+          <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="rgba(37, 99, 235, 0.22)" />
+            <stop offset="100%" stopColor="rgba(37, 99, 235, 0.02)" />
           </linearGradient>
         </defs>
 
@@ -69,7 +71,7 @@ export function MomentumChart({ title, subtitle, points }: Props) {
                 y1={y}
                 x2={w - padR}
                 y2={y}
-                stroke="rgba(232,228,218,0.08)"
+                stroke="rgba(30,64,175,0.08)"
                 strokeWidth={1}
               />
               <text
@@ -86,12 +88,12 @@ export function MomentumChart({ title, subtitle, points }: Props) {
           );
         })}
 
-        <path d={areaD} fill="url(#momentumArea)" />
+        <path d={areaD} fill={`url(#${gradId})`} />
         <path
           d={lineD}
           fill="none"
-          stroke="var(--positive)"
-          strokeWidth={2}
+          stroke="var(--accent)"
+          strokeWidth={2.25}
           strokeLinejoin="round"
           strokeLinecap="round"
         />
@@ -102,8 +104,8 @@ export function MomentumChart({ title, subtitle, points }: Props) {
             cx={xScale(i)}
             cy={yScale(p.index_value)}
             r={4}
-            fill="var(--text)"
-            stroke="var(--positive)"
+            fill="var(--surface)"
+            stroke="var(--accent)"
             strokeWidth={2}
           />
         ))}

@@ -33,17 +33,8 @@ export function ProcessingView({ active }: Props) {
 
   return (
     <div className="card" style={{ maxWidth: 520, margin: "0 auto" }}>
-      <div style={{ padding: "2rem" }}>
-        <h2
-          style={{
-            fontFamily: "var(--serif)",
-            fontSize: "1.35rem",
-            fontWeight: 400,
-            margin: "0 0 1.25rem",
-          }}
-        >
-          Processing
-        </h2>
+      <div className="page-card-inner">
+        <h2 className="processing-title">processing your dossier…</h2>
         <ul className="processing-list">
           {STAGES.map((label, i) => {
             const done = i < idx;
@@ -61,13 +52,13 @@ export function ProcessingView({ active }: Props) {
         </ul>
         <p
           style={{
-            fontSize: "0.8rem",
+            fontSize: "0.82rem",
             color: "var(--text-dim)",
             margin: "1.25rem 0 0",
+            fontFamily: "var(--mono)",
           }}
         >
-          Models are evaluating the image and your assortment context. This may take
-          a minute.
+          models are reading the still and your plan — give it up to a minute.
         </p>
       </div>
     </div>

@@ -157,16 +157,9 @@ export function OpportunityReportView({
 
   return (
     <div className="card" style={{ overflow: "hidden" }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "flex-end",
-          padding: "1rem 1.25rem 0",
-          gap: "0.5rem",
-        }}
-      >
+      <div className="report-actions">
         <button type="button" className="btn btn-ghost" onClick={onReset}>
-          New analysis
+          new analysis
         </button>
       </div>
 
@@ -180,17 +173,7 @@ export function OpportunityReportView({
           }}
         >
           {imagePreviewUrl ? (
-            <img
-              src={imagePreviewUrl}
-              alt=""
-              style={{
-                width: 120,
-                height: 120,
-                objectFit: "cover",
-                border: "1px solid var(--border)",
-                borderRadius: 2,
-              }}
-            />
+            <img src={imagePreviewUrl} alt="" className="report-hero-thumb" />
           ) : null}
           <div style={{ flex: "1 1 240px" }}>
             <h1 className="report-title">{headline}</h1>

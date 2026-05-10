@@ -3,6 +3,7 @@ import { LandingUpload } from "./components/LandingUpload";
 import { BusinessContextForm } from "./components/BusinessContextForm";
 import { ProcessingView } from "./components/ProcessingView";
 import { OpportunityReportView } from "./components/OpportunityReport";
+import { EditorialDoodleStrip, EditorialDocMark } from "./components/EditorialDecor";
 import { analyzeGarmentOpportunity, fileToBase64 } from "./lib/analyzeApi";
 import type { BusinessContext, OpportunityReport } from "./lib/types";
 
@@ -56,13 +57,20 @@ export default function App() {
   return (
     <div className="app-shell">
       <header className="app-header">
-        <div>
-          <div className="app-brand">Fashion Opportunity Intelligence</div>
-          <div className="app-tagline">Assortment opportunity engine</div>
+        <div className="app-header-inner">
+          <EditorialDocMark />
+          <div className="app-header-text">
+            <div className="app-header-top">
+              <span className="year-pill">{new Date().getFullYear()}</span>
+            </div>
+            <div className="app-brand">fashion opportunity intelligence</div>
+            <div className="app-tagline">assortment opportunity engine — editorial briefings</div>
+          </div>
         </div>
       </header>
 
       <main className="app-main">
+        <EditorialDoodleStrip />
         {error ? <div className="error-banner">{error}</div> : null}
 
         {step === "upload" ? (
