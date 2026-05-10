@@ -30,6 +30,8 @@ export type TrendAnalysis = {
   momentum_score: number;
   saturation_risk: number;
   confidence_score: number;
+  /** Seven Jan–Mar checkpoints when model projects monthly momentum; optional. */
+  momentum_monthly_index?: number[];
 };
 
 export type OpportunityAnalysis = {

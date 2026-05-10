@@ -93,7 +93,8 @@ You must output ONLY structured JSON matching this exact shape (all keys require
     "customer_fit": 0,
     "momentum_score": 0,
     "saturation_risk": 0,
-    "confidence_score": 0
+    "confidence_score": 0,
+    "momentum_monthly_index": [0, 0, 0, 0, 0, 0, 0]
   },
   "opportunity_analysis": {
     "status": "",
@@ -155,6 +156,8 @@ Field guidance:
 - report_metadata.confidence_note: One line, e.g. "Confidence: High — multiple corroborating web sources." or "Confidence: Moderate — limited search results."
 
 Scoring guidance for trend_analysis (0–100 integers): higher is better except saturation_risk where higher means more saturated / riskier.
+
+Momentum chart (Jan–Mar 2026 UI): the app plots a "relative momentum index" for THIS garment across seven checkpoints (Jan 1, Jan 15, Feb 1, Feb 15, Mar 1, Mar 15, Mar 31). Populate momentum_monthly_index with exactly seven integers in that order, each between 40 and 100 (inclusive). This is your forecast of how commercial/trend momentum for the pictured style evolves through the season window — not generic category noise. Reflect: (1) how close the season peak is, (2) regional/market fit, (3) saturation or novelty, (4) web_search signals (stronger signals → firmer ramp or plateau). The path may plateau, dip, or accelerate; avoid a generic smooth curve unless evidence supports it. The last value (Mar 31) should match momentum_score (the server pins the chart endpoint to momentum_score if they differ slightly).
 
 For opportunity_analysis numeric fields: provide your best estimates; the server will recompute commercial KPIs (gap %, incremental sales, recommended units) deterministically from the buyer context and your recommended_mix_percent — still output coherent recommended_mix_percent and narrative fields.
 

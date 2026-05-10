@@ -52,7 +52,12 @@ def _build_trend_score_bars(t: dict[str, Any], ctx: BusinessContext) -> list[dic
     return out
 
 
-def _build_momentum_trendline(momentum_end: int, category: str, season: str) -> dict[str, Any]:
+def _clamp_momentum_chart_value(value: Any) -> int:
+    """Relative index on chart is shown in a ~40–100 band."""
+    return _clamp_int(value, 40, 100)
+
+
+def _build_momentum_trendline(trend: dict[str, Any], category: str, season: str) -> dict[str, Any]:
     dates = [
         "2026-01-01",
         "2026-01-15",
@@ -62,15 +67,25 @@ def _build_momentum_trendline(momentum_end: int, category: str, season: str) -> 
         "2026-03-15",
         "2026-03-31",
     ]
-    end = max(40, min(100, int(momentum_end)))
-    start = max(40, end - 26)
+    end = _clamp_momentum_chart_value(trend.get("momentum_score", 0))
+    raw_series = trend.get("momentum_monthly_index")
     n = len(dates)
-    points: list[dict[str, Any]] = []
-    for i in range(n):
-        t = i / (n - 1) if n > 1 else 1.0
-        eased = 1 - (1 - t) ** 2
-        v = start + (end - start) * eased
-        points.append({"date": dates[i], "index_value": round(v)})
+    points: list[dict[str, Any]]
+
+    if isinstance(raw_series, list) and len(raw_series) >= n:
+        points = []
+        for i in range(n):
+            v = _clamp_momentum_chart_value(raw_series[i])
+            points.append({"date": dates[i], "index_value": int(v)})
+        points[-1]["index_value"] = end
+    else:
+        start = max(40, end - 26)
+        points = []
+        for i in range(n):
+            tfrac = i / (n - 1) if n > 1 else 1.0
+            eased = 1 - (1 - tfrac) ** 2
+            v = start + (end - start) * eased
+            points.append({"date": dates[i], "index_value": round(v)})
     cat = (category or "Category").strip().upper()
     return {
         "title": f"Momentum trendline — {cat}",
@@ -142,9 +157,7 @@ def _build_dashboard(
         ),
     }
 
-    report["momentum_trendline"] = _build_momentum_trendline(
-        int(t.get("momentum_score", 0)), category, ctx.season
-    )
+    report["momentum_trendline"] = _build_momentum_trendline(t, category, ctx.season)
 
 
 def _clamp_int(value: Any, lo: int = 0, hi: int = 100) -> int:
@@ -180,6 +193,12 @@ def apply_final_calculations(report: dict[str, Any], ctx: BusinessContext) -> di
         "confidence_score",
     ):
         t[key] = _clamp_int(t.get(key))
+
+    mmi = t.get("momentum_monthly_index")
+    if isinstance(mmi, list) and len(mmi) >= 7:
+        t["momentum_monthly_index"] = [_clamp_momentum_chart_value(x) for x in mmi[:7]]
+    else:
+        t.pop("momentum_monthly_index", None)
 
     o = report.setdefault("opportunity_analysis", {})
 
