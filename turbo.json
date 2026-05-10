@@ -3,10 +3,8 @@
   "globalEnv": [
     "ANTHROPIC_API_KEY",
     "APIFY_TOKEN",
-    "CLAUDE_MODEL",
-    "AGENT_MAX_ITERATIONS",
-    "APIFY_ACTOR_INSTAGRAM",
-    "APIFY_ACTOR_WEB"
+    "APIFY_MCP_URL",
+    "CLAUDE_MODEL"
   ],
   "tasks": {
     "build": {

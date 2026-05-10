@@ -1,8 +1,6 @@
 export type { ClaudeTrendAnalysis } from "./claudeSchema.js";
 export { heuristicAnalysis, inferTrends } from "./claude.js";
 export { runTrendAgent } from "./claudeAgent.js";
-export { runActorSync } from "./apifyClient.js";
-export { runInstagramActor, runWebActor } from "./apifyService.js";
 export { collectMockSignals, collectSignals } from "./collectSignals.js";
 export { computeScores } from "./scoring.js";
 export type { ScoringOutput, IndexStatus } from "./scoring.js";

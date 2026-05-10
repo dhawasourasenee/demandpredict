@@ -1,19 +1,17 @@
 # Fashion Opportunity Calculator
 
 Frontend-first Vercel app for the AI Fashion Opportunity Calculator. The React UI lives in
-`apps/web`, shared logic lives in `packages/*`, and the secure Anthropic/Apify calls run in
-Vercel functions under `api/` using Vercel environment variables.
+`apps/web`, shared logic lives in `packages/*`, and Vercel functions under `api/` keep
+AI credentials server-side while Claude reaches Apify through Anthropic's remote MCP connector.
 
 ## Prerequisites
 
 - Node 18+ and `pnpm` (`npx pnpm@9.15.4` works if Corepack symlinks fail).
 - Vercel environment variables for live AI/tool calls:
   - `ANTHROPIC_API_KEY`
-  - `APIFY_TOKEN`
+  - `APIFY_TOKEN` for the Apify hosted MCP server
+  - `APIFY_MCP_URL` optional, defaults to `https://mcp.apify.com/?tools=apify/instagram-hashtag-scraper,apify/google-search-scraper`
   - `CLAUDE_MODEL` optional, defaults to `claude-sonnet-4-6`
-  - `AGENT_MAX_ITERATIONS` optional, defaults to `6`
-  - `APIFY_ACTOR_INSTAGRAM` optional, defaults to `apify/instagram-hashtag-scraper`
-  - `APIFY_ACTOR_WEB` optional, defaults to `apify/google-search-scraper`
 
 ## Install
 
@@ -32,9 +30,9 @@ pnpm --filter @foc/web dev
 
 - Web: http://localhost:5173
 - API functions: same-origin `/api/*` in production; Vite proxies `/api/*` to Vercel dev locally.
-- **HTTPS flow**: the SPA sends planner JSON (and optional `agent_system_prompt_addendum`) via **HTTPS POST** to `/api/calculations`. The server holds `ANTHROPIC_API_KEY` / `APIFY_TOKEN`, invokes **Claude** with tools, runs **Apify** when Claude calls tools, and returns JSON to the browser. Do **not** call Anthropic or Apify from the browser with API keys.
+- **HTTPS flow**: the SPA sends planner JSON (and optional `agent_system_prompt_addendum`) via **HTTPS POST** to `/api/calculations`. The Vercel function holds `ANTHROPIC_API_KEY` / `APIFY_TOKEN`, invokes **Claude** with Anthropic's remote MCP connector, and Claude connects to the **Apify hosted MCP server**. The app no longer calls Apify actors directly. Do **not** call Anthropic or Apify from the browser with API keys.
 - If `ANTHROPIC_API_KEY` is missing, the calculator uses heuristic analysis.
-- If `APIFY_TOKEN` is missing, Claude tool calls receive mock trend signals.
+- If `APIFY_TOKEN` is missing, the calculator uses heuristic analysis instead of attempting MCP tool calls.
 
 ## Build
 
