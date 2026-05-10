@@ -385,8 +385,8 @@ export function OpportunityReportView({
       <section className="section">
         <h2 className="section-title">Evidence summary</h2>
         <p className="section-kicker">
-          Grounded in live web search when <code className="inline-code">TAVILY_API_KEY</code>{" "}
-          is configured on the server; otherwise desk-estimated signals.
+          Evidence is grounded in OpenAI-hosted web search when the API runs with a model that supports
+          the Responses API <code className="inline-code">web_search</code> tool.
         </p>
         {report.evidence_summary?.length ? (
           <div className="evidence-grid">

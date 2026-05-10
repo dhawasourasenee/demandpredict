@@ -7,10 +7,45 @@ import httpx
 
 from api.parse_json_util import extract_json_object
 from api.schemas import BusinessContext
-from api.search_context import fetch_live_search_context
 from api.system_prompt import FASHION_OPPORTUNITY_SYSTEM_PROMPT
 
-OPENAI_URL = "https://api.openai.com/v1/chat/completions"
+OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses"
+
+
+def _extract_assistant_json_text(data: dict) -> str:
+    """Last assistant output_text in a Responses API payload."""
+    out = data.get("output")
+    if not isinstance(out, list):
+        return ""
+    last = ""
+    for item in out:
+        if not isinstance(item, dict) or item.get("type") != "message":
+            continue
+        if item.get("role") != "assistant":
+            continue
+        for part in item.get("content") or []:
+            if not isinstance(part, dict) or part.get("type") != "output_text":
+                continue
+            t = part.get("text")
+            if isinstance(t, str) and t.strip():
+                last = t
+    return last
+
+
+def _web_search_tool(ctx: BusinessContext) -> dict:
+    tool: dict = {
+        "type": "web_search",
+        "search_context_size": "high",
+    }
+    region = (ctx.region or "").strip()
+    if region:
+        loc: dict = {"type": "approximate"}
+        if len(region) == 2 and region.isalpha():
+            loc["country"] = region.upper()
+        else:
+            loc["region"] = region
+        tool["user_location"] = loc
+    return tool
 
 
 async def call_openai_vision(
@@ -22,48 +57,47 @@ async def call_openai_vision(
     if not api_key:
         raise RuntimeError("OPENAI_API_KEY is not set on the server")
 
-    model = (os.environ.get("OPENAI_MODEL") or "gpt-4o").strip() or "gpt-4o"
-
-    search_blob = await fetch_live_search_context(ctx)
-    search_block = (
-        "### SEARCH CONTEXT (live web — ground evidence here; quote domains/outlets that appear)\n"
-        f"{search_blob}\n###\n\n"
-        if search_blob
-        else "### SEARCH CONTEXT\n(none — no live search configured; keep evidence conservative and flag uncertainty.)\n###\n\n"
-    )
+    # Responses API + hosted web_search: use a model that supports both vision and web_search
+    # (see https://platform.openai.com/docs/guides/tools-web-search ).
+    model = (os.environ.get("OPENAI_MODEL") or "gpt-4.1").strip() or "gpt-4.1"
 
     user_text = (
-        f"{search_block}"
         f"Business context (JSON):\n{ctx.model_dump_json(indent=2)}\n\n"
-        "Analyze the attached garment image. Return ONLY one JSON object matching the schema "
-        "from your instructions. No markdown, no prose outside JSON."
+        "You MUST use the web_search tool first (one or more queries) to gather current "
+        "fashion/editorial/retail signals for this garment type and the business context "
+        "(season, market, region, customer, ASP tier).\n"
+        "Then respond with ONLY one JSON object matching the schema in your instructions. "
+        "No markdown fences, no prose outside JSON.\n"
+        "Ground evidence_summary in outlets, domains, or retailers surfaced by web search; "
+        "do not invent specific headlines, handles, or SKUs that search did not support.\n"
     )
 
-    body = {
+    body: dict = {
         "model": model,
-        "response_format": {"type": "json_object"},
-        "messages": [
-            {"role": "system", "content": FASHION_OPPORTUNITY_SYSTEM_PROMPT},
+        "instructions": FASHION_OPPORTUNITY_SYSTEM_PROMPT,
+        "input": [
             {
                 "role": "user",
                 "content": [
-                    {"type": "text", "text": user_text},
+                    {"type": "input_text", "text": user_text},
                     {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": f"data:{image_mime};base64,{image_b64}",
-                            "detail": "high",
-                        },
+                        "type": "input_image",
+                        "image_url": f"data:{image_mime};base64,{image_b64}",
+                        "detail": "high",
                     },
                 ],
-            },
+            }
         ],
-        "max_tokens": 6144,
+        "tools": [_web_search_tool(ctx)],
+        "tool_choice": "required",
+        "include": ["web_search_call.action.sources"],
+        "text": {"format": {"type": "json_object"}},
+        "max_output_tokens": 8192,
     }
 
-    async with httpx.AsyncClient(timeout=120.0) as client:
+    async with httpx.AsyncClient(timeout=180.0) as client:
         r = await client.post(
-            OPENAI_URL,
+            OPENAI_RESPONSES_URL,
             headers={
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {api_key}",
@@ -84,12 +118,7 @@ async def call_openai_vision(
                 msg = err.get("message")
         raise RuntimeError(msg or f"OpenAI request failed ({r.status_code})")
 
-    choices = data.get("choices") if isinstance(data, dict) else None
-    raw = None
-    if isinstance(choices, list) and choices:
-        msg = choices[0].get("message") if isinstance(choices[0], dict) else None
-        if isinstance(msg, dict):
-            raw = msg.get("content")
+    raw = _extract_assistant_json_text(data)
     if not raw:
         raise RuntimeError("Empty response from model")
 
