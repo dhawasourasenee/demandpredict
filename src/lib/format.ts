@@ -21,12 +21,19 @@ export function saturationLabel(score: number): string {
   return "High";
 }
 
+/**
+ * Hero "Opportunity score": blends commercial drivers then penalizes saturation.
+ * Confidence is shown separately — do not duplicate it here.
+ */
 export function opportunityComposite(report: {
   trend_analysis: {
     trend_strength: number;
     commercial_viability: number;
     momentum_score: number;
     customer_fit: number;
+    regional_relevance: number;
+    seasonal_relevance: number;
+    saturation_risk: number;
   };
 }): number {
   const t = report.trend_analysis;
@@ -35,7 +42,14 @@ export function opportunityComposite(report: {
     t.commercial_viability,
     t.momentum_score,
     t.customer_fit,
+    t.regional_relevance,
+    t.seasonal_relevance,
   ].filter((n) => typeof n === "number" && !Number.isNaN(n));
   if (!vals.length) return 0;
-  return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
+  const base = vals.reduce((a, b) => a + b, 0) / vals.length;
+  const sat = Math.max(0, Math.min(100, Number(t.saturation_risk) || 0));
+  // Higher saturation = more crowded category → compress opportunity (up to ~half weight at sat=100)
+  const saturationFactor = 1 - 0.48 * (sat / 100);
+  const score = base * saturationFactor;
+  return Math.max(0, Math.min(100, Math.round(score)));
 }

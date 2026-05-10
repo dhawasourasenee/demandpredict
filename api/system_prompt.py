@@ -157,6 +157,19 @@ Field guidance:
 
 Scoring guidance for trend_analysis (0–100 integers): higher is better except saturation_risk where higher means more saturated / riskier.
 
+Calibration — read the Business context JSON on every run (region, season, target_customer, ASP, planned_mix_percent, planned_units, sell_through). Tie numbers to the actual garment in the image, not generic category priors.
+
+- regional_relevance: Would this silhouette/fabric/color story work in that region (climate, modesty norms where relevant, local taste, competitive set)? Low if the style is mismatched to the stated region.
+- seasonal_relevance: For the given season code (e.g. SS26), is this item in-window for delivery and wear period? Penalize heavy outerwear in hot-season markets, wrong fabric weight, or off-season color stories unless search evidence supports a deliberate counter-season bet.
+- customer_fit: Does the aesthetic and price band implied by the image fit the stated target_customer (mass / contemporary / premium, etc.) and ASP? Penalize looks that read too niche or too elevated for mass plans.
+- commercial_viability: Given planned_units and mix, is there realistic sell-through potential at the ASP, or is the item too fashion-forward, too saturated, or too small an addressable audience?
+- trend_strength: Directional energy from search + visual (runway/editorial/social/retail adoption), not the same as commercial_viability.
+- momentum_score: Near-term to mid-season momentum for this style archetype in that market (may differ from trend_strength if early or late cycle).
+- saturation_risk: How crowded is this micro-trend? High when many substitutable options exist at mass, or when the item is a "nice but not needed" add-on. This score materially lowers the dashboard Opportunity score — use the full 0–100 range; avoid defaulting to mid-60s.
+- confidence_score: Your certainty in the assessment — NOT an average of the other scores. Base it on: garment clarity from the image, richness/agreement of web_search evidence, and whether signals contradict each other. Use a wide range: thin search + ambiguous image might be 38–52; strong corroboration + clear product read 78–92. Never set confidence within ±5 of another score "to match" — it is epistemic, not commercial.
+
+opportunity_analysis.status (Trend status hero line): One short sentence that matches the numeric story — if opportunity is weak, say so plainly (e.g. timing, saturation, or customer mismatch); do not sound bullish when scores are mediocre.
+
 Momentum chart (Jan–Mar 2026 UI): the app plots a "relative momentum index" for THIS garment across seven checkpoints (Jan 1, Jan 15, Feb 1, Feb 15, Mar 1, Mar 15, Mar 31). Populate momentum_monthly_index with exactly seven integers in that order, each between 40 and 100 (inclusive). This is your forecast of how commercial/trend momentum for the pictured style evolves through the season window — not generic category noise. Reflect: (1) how close the season peak is, (2) regional/market fit, (3) saturation or novelty, (4) web_search signals (stronger signals → firmer ramp or plateau). The path may plateau, dip, or accelerate; avoid a generic smooth curve unless evidence supports it. The last value (Mar 31) should match momentum_score (the server pins the chart endpoint to momentum_score if they differ slightly).
 
 For opportunity_analysis numeric fields: provide your best estimates; the server will recompute commercial KPIs (gap %, incremental sales, recommended units) deterministically from the buyer context and your recommended_mix_percent — still output coherent recommended_mix_percent and narrative fields.
