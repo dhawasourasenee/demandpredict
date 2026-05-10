@@ -39,25 +39,3 @@ export function EditorialDoodleStrip() {
   );
 }
 
-export function EditorialDocMark({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className ?? "editorial-mark"}
-      viewBox="0 0 40 48"
-      width="40"
-      height="48"
-      aria-hidden
-    >
-      <g
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M10 6h14l8 8v26a4 4 0 0 1-4 4H10a4 4 0 0 1-4-4V10a4 4 0 0 1 4-4z" />
-        <path d="M24 6v8h8M14 22h16M14 28h12M14 34h16" />
-      </g>
-    </svg>
-  );
-}

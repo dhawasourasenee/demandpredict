@@ -3,7 +3,8 @@ import { LandingUpload } from "./components/LandingUpload";
 import { BusinessContextForm } from "./components/BusinessContextForm";
 import { ProcessingView } from "./components/ProcessingView";
 import { OpportunityReportView } from "./components/OpportunityReport";
-import { EditorialDoodleStrip, EditorialDocMark } from "./components/EditorialDecor";
+import { Article } from "@phosphor-icons/react";
+import { EditorialDoodleStrip } from "./components/EditorialDecor";
 import { analyzeGarmentOpportunity, fileToBase64 } from "./lib/analyzeApi";
 import type { BusinessContext, OpportunityReport } from "./lib/types";
 
@@ -58,7 +59,7 @@ export default function App() {
     <div className="app-shell">
       <header className="app-header">
         <div className="app-header-inner">
-          <EditorialDocMark />
+          <Article className="header-ph-icon" size={40} weight="thin" aria-hidden />
           <div className="app-header-text">
             <div className="app-header-top">
               <span className="year-pill">{new Date().getFullYear()}</span>
