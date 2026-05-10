@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "installCommand": "pnpm install",
-  "buildCommand": "pnpm exec turbo run build --filter=@foc/web",
+  "buildCommand": "pnpm exec turbo run build --filter=@foc/server --filter=@foc/web",
   "outputDirectory": "apps/web/dist",
   "framework": null,
   "rewrites": [
