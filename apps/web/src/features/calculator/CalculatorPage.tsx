@@ -9,6 +9,7 @@ import {
   type TextareaHTMLAttributes,
 } from "react";
 import { useForm } from "react-hook-form";
+import type { FieldErrors } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 
 import { CalcIconCircle, InfoTip, PageFrame } from "@/components/layout/PageFrame";
@@ -72,6 +73,24 @@ function FloatingTextarea({
   );
 }
 
+function summarizeValidationErrors(errors: FieldErrors<CalculationInput>): string {
+  const parts: string[] = [];
+  const walk = (o: Record<string, unknown>, prefix = "") => {
+    for (const [key, val] of Object.entries(o)) {
+      if (!val || typeof val !== "object") continue;
+      const at = `${prefix}${key}`;
+      const rec = val as Record<string, unknown>;
+      if (typeof rec.message === "string" && rec.message) {
+        parts.push(`${at}: ${rec.message}`);
+        continue;
+      }
+      walk(rec as Record<string, unknown>, `${at}.`);
+    }
+  };
+  walk(errors as Record<string, unknown>);
+  return parts.length ? parts.slice(0, 5).join(" · ") : "Please fix invalid fields before calculating.";
+}
+
 function RadioChip({
   name,
   value,
@@ -126,6 +145,7 @@ export default function CalculatorPage() {
       planned_mix_percent: 15.7,
       planned_units: 300,
       expected_sell_through_percent: 68,
+      agent_system_prompt_addendum: "",
     }),
     [],
   );
@@ -152,10 +172,15 @@ export default function CalculatorPage() {
     onError: (err: Error) => setStatusMsg(err.message || "Calculation failed"),
   });
 
-  const onSubmit = form.handleSubmit((values) => {
-    setStatusMsg(null);
-    mutation.mutate(values);
-  });
+  const onSubmit = form.handleSubmit(
+    (values) => {
+      setStatusMsg(null);
+      mutation.mutate(values);
+    },
+    (errors) => {
+      setStatusMsg(summarizeValidationErrors(errors));
+    },
+  );
 
   return (
     <PageFrame>
@@ -187,6 +212,18 @@ export default function CalculatorPage() {
             commercial inputs—confidence always depends on how much evidence is retrieved for each run.
           </p>
         </aside>
+
+        <section className="mb-10 rounded border border-neutral-200 bg-neutral-50/80 px-4 py-3">
+          <div className="mb-2 flex items-center gap-2">
+            <h2 className="text-sm font-semibold text-neutral-900">How the request works</h2>
+            <InfoTip label="Your browser sends one HTTPS POST (JSON) to /api/calculations with planner fields plus optional agent instructions. The server adds Anthropic and Apify credentials, runs Claude with tools, and returns the report JSON. Keys never ship to the client." />
+          </div>
+          <p className="text-[13px] leading-relaxed text-neutral-700">
+            Calculate uses a secure <span className="font-medium text-neutral-900">HTTPS</span> request to your
+            deployment&apos;s API route—not a direct browser call to Anthropic. Claude runs on the server, calls Apify-backed
+            tools when needed, and the response is sent back over HTTPS.
+          </p>
+        </section>
 
         <form onSubmit={onSubmit} className="space-y-8">
           <section>
@@ -380,6 +417,19 @@ export default function CalculatorPage() {
               {...form.register("expected_sell_through_percent", { valueAsNumber: true })}
             />
           </div>
+
+          <section>
+            <div className="mb-3 flex items-center gap-2">
+              <h3 className="text-sm font-semibold text-neutral-900">Agent system instructions</h3>
+              <InfoTip label="Optional. Appended to the platform system prompt server-side—never put API secrets here." />
+            </div>
+            <FloatingTextarea
+              label="Addendum for Claude"
+              rows={4}
+              placeholder="e.g. Weight India mass-market assortment; prefer recent posts within the date range."
+              {...form.register("agent_system_prompt_addendum")}
+            />
+          </section>
 
           <div className="flex justify-end gap-3 pt-4">
             <button

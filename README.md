@@ -32,6 +32,7 @@ pnpm --filter @foc/web dev
 
 - Web: http://localhost:5173
 - API functions: same-origin `/api/*` in production; Vite proxies `/api/*` to Vercel dev locally.
+- **HTTPS flow**: the SPA sends planner JSON (and optional `agent_system_prompt_addendum`) via **HTTPS POST** to `/api/calculations`. The server holds `ANTHROPIC_API_KEY` / `APIFY_TOKEN`, invokes **Claude** with tools, runs **Apify** when Claude calls tools, and returns JSON to the browser. Do **not** call Anthropic or Apify from the browser with API keys.
 - If `ANTHROPIC_API_KEY` is missing, the calculator uses heuristic analysis.
 - If `APIFY_TOKEN` is missing, Claude tool calls receive mock trend signals.
 

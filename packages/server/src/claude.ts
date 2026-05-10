@@ -3,7 +3,7 @@ import type { Message } from "@anthropic-ai/sdk/resources/messages/messages.js";
 import type { CalculationInput } from "@foc/shared";
 
 import { claudeTrendAnalysisSchema, type ClaudeTrendAnalysis } from "./claudeSchema.js";
-import { SYSTEM_PROMPT, userPromptBlock } from "./prompts.js";
+import { SYSTEM_PROMPT, userContentForAgentFromCalculation } from "./prompts.js";
 import type { RawSignal } from "./types.js";
 
 function regionHintScore(region: string): number {
@@ -114,9 +114,8 @@ export async function inferTrends(
     .slice(0, 20)
     .map((s) => `[${s.source_type}] ${s.title}: ${s.snippet.slice(0, 400)}`);
 
-  const inpDict = inp as unknown as Record<string, unknown>;
   void bullets;
-  const userPrompt = userPromptBlock(inpDict);
+  const userPrompt = userContentForAgentFromCalculation(inp);
 
   const first = await client.messages.create({
     model,

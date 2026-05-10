@@ -1,5 +1,13 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalEnv": [
+    "ANTHROPIC_API_KEY",
+    "APIFY_TOKEN",
+    "CLAUDE_MODEL",
+    "AGENT_MAX_ITERATIONS",
+    "APIFY_ACTOR_INSTAGRAM",
+    "APIFY_ACTOR_WEB"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

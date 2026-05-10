@@ -5,7 +5,7 @@ import type { CalculationInput } from "@foc/shared";
 import { runInstagramActor, runWebActor } from "./apifyService.js";
 import { claudeTrendAnalysisSchema, type ClaudeTrendAnalysis } from "./claudeSchema.js";
 import { heuristicAnalysis } from "./claude.js";
-import { SYSTEM_PROMPT, userPromptBlock } from "./prompts.js";
+import { buildAgentSystemPrompt, userContentForAgentFromCalculation } from "./prompts.js";
 import type { RawSignal } from "./types.js";
 
 const INSTAGRAM_TOOL: Tool = {
@@ -139,6 +139,7 @@ async function executeToolDispatch(
 export async function runTrendAgent(
   inp: CalculationInput,
   requestId: string,
+  opts?: { systemAddendum?: string },
 ): Promise<{ analysis: ClaudeTrendAnalysis; signals: RawSignal[] }> {
   const apiKey = process.env.ANTHROPIC_API_KEY?.trim() ?? "";
   if (!apiKey) return { analysis: heuristicAnalysis(inp, []), signals: [] };
@@ -146,7 +147,8 @@ export async function runTrendAgent(
   const client = new Anthropic({ apiKey });
   const model = process.env.CLAUDE_MODEL?.trim() || "claude-sonnet-4-6";
   const maxIterations = Math.max(1, Number(process.env.AGENT_MAX_ITERATIONS ?? 6));
-  const userPrompt = userPromptBlock(inp as unknown as Record<string, unknown>);
+  const system = buildAgentSystemPrompt(opts?.systemAddendum);
+  const userPrompt = userContentForAgentFromCalculation(inp);
   const messages: MessageParam[] = [{ role: "user", content: userPrompt }];
   const combinedSignals: RawSignal[] = [];
   let analysis: ClaudeTrendAnalysis | undefined;
@@ -157,7 +159,7 @@ export async function runTrendAgent(
       max_tokens: 4096,
       temperature: 0.2,
       stream: false,
-      system: SYSTEM_PROMPT,
+      system,
       tools: TOOLS,
       tool_choice: { type: "auto" },
       messages,
@@ -204,7 +206,7 @@ export async function runTrendAgent(
       max_tokens: 2500,
       temperature: 0.1,
       stream: false,
-      system: SYSTEM_PROMPT,
+      system,
       tools: TOOLS,
       tool_choice: { type: "none" },
       messages,
