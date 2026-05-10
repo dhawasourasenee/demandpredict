@@ -38,6 +38,7 @@ export function buildFinalReportPayload(
     prettyWords(inp.item, 140),
     inp.market.charAt(0).toUpperCase() + inp.market.slice(1),
     region,
+    inp.season,
     `${inp.date_range.start} → ${inp.date_range.end}`,
   ].join(", ");
 
@@ -50,6 +51,7 @@ export function buildFinalReportPayload(
         category: prettyWords(inp.category),
         market: inp.market.charAt(0).toUpperCase() + inp.market.slice(1),
         region,
+        season: inp.season,
         start: inp.date_range.start,
         end: inp.date_range.end,
       },

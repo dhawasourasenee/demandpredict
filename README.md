@@ -30,7 +30,7 @@ pnpm --filter @foc/web dev
 
 - Web: http://localhost:5173
 - API functions: same-origin `/api/*` in production; Vite proxies `/api/*` to Vercel dev locally.
-- **HTTPS flow**: the SPA sends planner JSON (and optional `agent_system_prompt_addendum`) via **HTTPS POST** to `/api/calculations`. The Vercel function holds `ANTHROPIC_API_KEY` / `APIFY_TOKEN`, invokes **Claude** with Anthropic's remote MCP connector, and Claude connects to the **Apify hosted MCP server**. The app no longer calls Apify actors directly. Do **not** call Anthropic or Apify from the browser with API keys.
+- **HTTPS flow**: the SPA sends planner JSON via **HTTPS POST** to `/api/calculations`. The Vercel function holds `ANTHROPIC_API_KEY` / `APIFY_TOKEN`, invokes **Claude** with Anthropic's remote MCP connector, and Claude connects to the **Apify hosted MCP server**. The app no longer calls Apify actors directly. Do **not** call Anthropic or Apify from the browser with API keys.
 - If `ANTHROPIC_API_KEY` is missing, the calculator uses heuristic analysis.
 - If `APIFY_TOKEN` is missing, the calculator uses heuristic analysis instead of attempting MCP tool calls.
 

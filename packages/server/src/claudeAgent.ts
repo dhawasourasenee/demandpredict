@@ -20,6 +20,11 @@ type BetaMessages = {
   create: (params: Record<string, unknown>) => Promise<AnthropicMcpResponse>;
 };
 
+function num(input: unknown): number | undefined {
+  const n = Number(input);
+  return Number.isFinite(n) ? n : undefined;
+}
+
 function extractJsonBlob(text: string): unknown {
   let stripped = text.trim();
   if (stripped.startsWith("```")) {
@@ -117,6 +122,77 @@ function extractMcpSignals(content: unknown[]): RawSignal[] {
   return signals.slice(0, 50);
 }
 
+function coerceObject(input: unknown): Record<string, unknown> {
+  return input && typeof input === "object" ? (input as Record<string, unknown>) : {};
+}
+
+function analysisFromFullReport(input: unknown): ClaudeTrendAnalysis | undefined {
+  const root = coerceObject(input);
+  const trendScores = coerceObject(root.trend_scores);
+  const summary = coerceObject(root.calculation_summary);
+  const assortment = coerceObject(root.assortment_analysis);
+  const recommendation = coerceObject(root.recommendation);
+  const confidence = coerceObject(root.confidence);
+  const related = Array.isArray(root.related_opportunities) ? root.related_opportunities : [];
+  const evidence = Array.isArray(root.evidence_summary) ? root.evidence_summary : [];
+
+  const data = {
+    trend_strength: num(trendScores.trend_strength ?? trendScores.trend_strength_score),
+    commercial_viability: num(trendScores.commercial_viability ?? trendScores.commercial_viability_score),
+    regional_relevance: num(trendScores.regional_relevance ?? trendScores.regional_relevance_score),
+    seasonal_relevance: num(trendScores.seasonal_relevance ?? trendScores.seasonal_relevance_score),
+    customer_fit: num(trendScores.customer_fit ?? trendScores.customer_fit_score),
+    saturation_risk: num(trendScores.saturation_risk ?? trendScores.saturation_risk_score),
+    momentum: num(trendScores.momentum ?? trendScores.momentum_score),
+    recommended_mix_percent: num(
+      summary.recommended_mix_percent ??
+        summary.recommended_assortment_mix_percent ??
+        assortment.recommended_mix_percent ??
+        assortment.recommended_assortment_mix_percent,
+    ),
+    status_explanation: str(assortment.notes ?? assortment.status_explanation ?? recommendation.summary),
+    assortment_recommendation: str(recommendation.summary ?? assortment.assortment_recommendation),
+    related_opportunity_labels: related
+      .map((item) => str(coerceObject(item).label ?? coerceObject(item).name ?? item))
+      .filter(Boolean)
+      .slice(0, 6),
+    risks: Array.isArray(root.risks) ? root.risks.map((x) => str(x)).filter(Boolean) : [],
+    confidence_reasoning: str(
+      recommendation.confidence_reasoning ?? confidence.reasoning ?? confidence.summary ?? confidence.level,
+    ),
+    evidence_linked_summary: evidence
+      .map((item) => {
+        const obj = coerceObject(item);
+        return str(obj.snippet ?? obj.summary ?? obj.source_title ?? item);
+      })
+      .filter(Boolean),
+  };
+
+  if (
+    data.trend_strength === undefined ||
+    data.commercial_viability === undefined ||
+    data.regional_relevance === undefined ||
+    data.seasonal_relevance === undefined ||
+    data.customer_fit === undefined ||
+    data.saturation_risk === undefined ||
+    data.momentum === undefined ||
+    data.recommended_mix_percent === undefined
+  ) {
+    return undefined;
+  }
+
+  return claudeTrendAnalysisSchema.parse(data);
+}
+
+function parseTrendAnalysis(text: string): ClaudeTrendAnalysis {
+  const data = extractJsonBlob(text);
+  const direct = claudeTrendAnalysisSchema.safeParse(data);
+  if (direct.success) return direct.data;
+  const report = analysisFromFullReport(data);
+  if (report) return report;
+  return claudeTrendAnalysisSchema.parse(data);
+}
+
 function betaMessages(client: Anthropic): BetaMessages {
   const maybe = client as unknown as { beta?: { messages?: BetaMessages } };
   if (!maybe.beta?.messages) {
@@ -163,7 +239,7 @@ async function coerceTrendAnalysis(
   assistantRawText: string,
 ): Promise<ClaudeTrendAnalysis> {
   try {
-    return claudeTrendAnalysisSchema.parse(extractJsonBlob(assistantRawText));
+    return parseTrendAnalysis(assistantRawText);
   } catch {
     const fix = await client.messages.create({
       model,
@@ -177,7 +253,7 @@ async function coerceTrendAnalysis(
         { role: "user", content: "Respond with JSON ONLY. No prose." },
       ],
     });
-    return claudeTrendAnalysisSchema.parse(extractJsonBlob(textFromContent(fix.content)));
+    return parseTrendAnalysis(textFromContent(fix.content));
   }
 }
 
@@ -195,7 +271,8 @@ export async function runTrendAgent(
   const client = new Anthropic({ apiKey });
   const beta = betaMessages(client);
   const model = process.env.CLAUDE_MODEL?.trim() || "claude-sonnet-4-6";
-  const system = buildAgentSystemPrompt(opts?.systemAddendum);
+  void opts;
+  const system = buildAgentSystemPrompt();
   const userPrompt = userContentForAgentFromCalculation(inp);
   const messages: MessageParam[] = [{ role: "user", content: userPrompt }];
   const combinedSignals: RawSignal[] = [];

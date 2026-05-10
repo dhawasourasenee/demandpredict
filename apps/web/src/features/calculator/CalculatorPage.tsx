@@ -138,6 +138,7 @@ export default function CalculatorPage() {
       department: "apparel",
       customer_type: "mass",
       region: "India",
+      season: "SS26",
       date_range: { start: "2026-01-01", end: "2026-03-31" },
       category: "bottoms",
       item: "bomber",
@@ -145,7 +146,6 @@ export default function CalculatorPage() {
       planned_mix_percent: 15.7,
       planned_units: 300,
       expected_sell_through_percent: 68,
-      agent_system_prompt_addendum: "",
     }),
     [],
   );
@@ -345,6 +345,19 @@ export default function CalculatorPage() {
 
           <section>
             <div className="mb-3 flex items-center gap-2">
+              <h3 className="text-sm font-semibold text-neutral-900">Season</h3>
+              <InfoTip label="Planning season used alongside the date range for seasonal relevance." />
+            </div>
+            <FloatingInput
+              label="Season"
+              type="text"
+              placeholder="e.g. SS26, AW26, Holiday…"
+              {...form.register("season")}
+            />
+          </section>
+
+          <section>
+            <div className="mb-3 flex items-center gap-2">
               <h3 className="text-sm font-semibold text-neutral-900">Date range</h3>
               <InfoTip label="Inclusive window used for trending and seasonal fit." />
             </div>
@@ -417,19 +430,6 @@ export default function CalculatorPage() {
               {...form.register("expected_sell_through_percent", { valueAsNumber: true })}
             />
           </div>
-
-          <section>
-            <div className="mb-3 flex items-center gap-2">
-              <h3 className="text-sm font-semibold text-neutral-900">Agent system instructions</h3>
-              <InfoTip label="Optional. Appended to the platform system prompt server-side—never put API secrets here." />
-            </div>
-            <FloatingTextarea
-              label="Addendum for Claude"
-              rows={4}
-              placeholder="e.g. Weight India mass-market assortment; prefer recent posts within the date range."
-              {...form.register("agent_system_prompt_addendum")}
-            />
-          </section>
 
           <div className="flex justify-end gap-3 pt-4">
             <button
